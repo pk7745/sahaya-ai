@@ -4,8 +4,8 @@ from sentence_transformers import SentenceTransformer
 model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2", local_files_only=True)
 
 client = QdrantClient(
-    url="https://7cb2a457-85e0-4ac9-b994-3d3be8a86266.us-west-2-0.aws.cloud.qdrant.io",
-    api_key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY2Nlc3MiOiJtIiwic3ViamVjdCI6ImFwaS1rZXk6YTA3MWU0NzYtOTk0OS00NmFlLWFlOGYtYmQ4ZDE5YzliZmE2In0.Fz2iaeBLjjJ_nsC78ySAT8ung-iLuNLHpFl-GjzeAew"
+   url=os.getenv("QDRANT_URL"),
+api_key=os.getenv("QDRANT_API_KEY")
 )
 
 collection_name = "knowledge_base"
