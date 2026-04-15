@@ -23,40 +23,36 @@ client = QdrantClient(
     api_key=os.getenv("QDRANT_API_KEY")
 )
 
-model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+model = None
+
+def get_model():
+    global model
+    if model is None:
+        model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+    return model
 
 collection_name = "knowledge_base"
 
-# ✅ OpenRouter client
 openrouter_client = OpenAI(
     api_key=os.getenv("OPENROUTER_API_KEY"),
     base_url="https://openrouter.ai/api/v1"
 )
-
-# ---------------- NEW FEATURE: SCHEME DETECTOR ----------------
 
 def detect_scheme(user_query):
     q = user_query.lower()
 
     if "farmer" in q:
         return "You may be eligible for PM-KISAN scheme (financial support for farmers)."
-
     elif "student" in q:
         return "You may be eligible for National Scholarship Portal (NSP) schemes."
-
     elif "pregnant" in q:
         return "You may be eligible for Pradhan Mantri Matru Vandana Yojana."
-
     elif "job" in q or "unemployed" in q:
         return "You may benefit from Skill India or PMKVY skill development schemes."
-
     elif "old" in q or "senior" in q:
         return "You may be eligible for old-age pension schemes."
 
     return ""
-
-
-# ---------------- NEW FEATURE: ELIGIBILITY QUESTIONS ----------------
 
 def eligibility_question(user_query):
     q = user_query.lower()
@@ -66,28 +62,19 @@ def eligibility_question(user_query):
 
     return ""
 
-
-# ---------------- NEW FEATURE: SIMPLE LOCATION HELP ----------------
-
 def location_help(user_query):
     q = user_query.lower()
 
     if "hospital" in q:
         return "Nearby help suggestion: You can visit the nearest government hospital in your city or district headquarters. For emergencies, call 108 ambulance."
-
     elif "bank" in q:
         return "Nearby help suggestion: You can visit the nearest nationalized bank branch such as SBI, Canara Bank, or Bank of Baroda."
-
     elif "police" in q:
         return "Nearby help suggestion: You can visit the nearest police station or call emergency police helpline 112."
-
     elif "ration" in q or "public service" in q or "service center" in q:
         return "Nearby help suggestion: You can visit the nearest ration office, Seva Sindhu center, MeeSeva center, or common service center in your area."
 
     return ""
-
-
-# ---------------- NEW FEATURE: SMART ELIGIBILITY CHECKER ----------------
 
 def extract_user_details(user_query):
     q = user_query.lower()
@@ -125,7 +112,6 @@ def extract_user_details(user_query):
 
     return details
 
-
 def smart_eligibility_flow(user_query):
     details = extract_user_details(user_query)
 
@@ -162,9 +148,6 @@ def smart_eligibility_flow(user_query):
         "matched_scheme": matched_scheme
     }
 
-
-# ---------------- NEW FEATURE: REWARD SYSTEM ----------------
-
 user_rewards = {
     "points": 0,
     "badges": []
@@ -192,9 +175,6 @@ Reward Update:
 """
 
     return reward_message
-
-
-# ---------------- NEW FEATURE: NOMINATIM MAP SEARCH ----------------
 
 def get_nearby_places(user_query):
     try:
@@ -226,22 +206,18 @@ def get_nearby_places(user_query):
     except:
         return ""
 
-
 class Query(BaseModel):
     query: str
-
 
 @app.get("/")
 def root():
     return {"status": "ok", "message": "Sahaya AI backend is running"}
 
-
 @app.post("/ask")
 def ask_question(query: Query):
-
     translated_query = GoogleTranslator(source="auto", target="en").translate(query.query)
 
-    vector = model.encode(translated_query)
+    vector = get_model().encode(translated_query)
 
     results = client.query_points(
         collection_name=collection_name,
@@ -252,7 +228,6 @@ def ask_question(query: Query):
     context = ""
 
     for hit in results.points:
-
         category = hit.payload.get("category", "")
         problem = hit.payload.get("problem", "")
         explanation = hit.payload.get("explanation", "")
@@ -326,7 +301,6 @@ Provide step-by-step guidance when relevant.
     )
 
     answer = response.choices[0].message.content
-
     final_answer = GoogleTranslator(source="en", target="auto").translate(answer)
 
     return {"response": final_answer}
