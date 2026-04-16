@@ -70,16 +70,6 @@ def get_openrouter_client():
     return openrouter_client_instance
 
 
-@app.on_event("startup")
-def load_resources():
-    try:
-        print("App startup: preloading model...")
-        get_model()
-        print("App startup: model preload complete.")
-    except Exception as e:
-        print(f"App startup: model preload failed: {e}")
-
-
 # ---------------- NEW FEATURE: SCHEME DETECTOR ----------------
 
 def detect_scheme(user_query):
@@ -87,16 +77,12 @@ def detect_scheme(user_query):
 
     if "farmer" in q:
         return "You may be eligible for PM-KISAN scheme (financial support for farmers)."
-
     elif "student" in q:
         return "You may be eligible for National Scholarship Portal (NSP) schemes."
-
     elif "pregnant" in q:
         return "You may be eligible for Pradhan Mantri Matru Vandana Yojana."
-
     elif "job" in q or "unemployed" in q:
         return "You may benefit from Skill India or PMKVY skill development schemes."
-
     elif "old" in q or "senior" in q:
         return "You may be eligible for old-age pension schemes."
 
@@ -121,13 +107,10 @@ def location_help(user_query):
 
     if "hospital" in q:
         return "Nearby help suggestion: You can visit the nearest government hospital in your city or district headquarters. For emergencies, call 108 ambulance."
-
     elif "bank" in q:
         return "Nearby help suggestion: You can visit the nearest nationalized bank branch such as SBI, Canara Bank, or Bank of Baroda."
-
     elif "police" in q:
         return "Nearby help suggestion: You can visit the nearest police station or call emergency police helpline 112."
-
     elif "ration" in q or "public service" in q or "service center" in q:
         return "Nearby help suggestion: You can visit the nearest ration office, Seva Sindhu center, MeeSeva center, or common service center in your area."
 
@@ -219,8 +202,6 @@ user_rewards = {
 
 
 def update_rewards(user_query, smart_eligibility, scheme_info):
-    reward_message = ""
-
     user_rewards["points"] += 5
 
     if scheme_info:
@@ -238,7 +219,6 @@ Reward Update:
 - Total Points: {user_rewards["points"]}
 - Badges Earned: {", ".join(user_rewards["badges"]) if user_rewards["badges"] else "None"}
 """
-
     return reward_message
 
 
