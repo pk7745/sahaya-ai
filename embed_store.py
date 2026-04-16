@@ -1,9 +1,10 @@
 from qdrant_client import QdrantClient
 from qdrant_client.models import VectorParams, Distance, PointStruct
 from sentence_transformers import SentenceTransformer
+import os
 
 # load embedding model
-model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2", local_files_only=True)
+model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # initialize Qdrant
 client = QdrantClient(
@@ -75,8 +76,6 @@ documents = [
 
 ]
 
-# -------- convert string documents to structured dictionaries --------
-
 structured_docs = []
 
 for doc in documents:
@@ -96,7 +95,6 @@ for doc in documents:
 
 documents = structured_docs
 
-# convert text to embeddings (improved semantic understanding)
 vectors = model.encode([
     doc["problem"] + " " + doc["explanation"]
     for doc in documents
@@ -118,7 +116,6 @@ for i, vector in enumerate(vectors):
         )
     )
 
-# store in Qdrant
 client.upsert(
     collection_name=collection_name,
     points=points
