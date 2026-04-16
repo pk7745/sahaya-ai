@@ -25,8 +25,10 @@ openrouter_client_instance = None
 def get_model():
     global model
     if model is None:
+        print("Loading SentenceTransformer model...")
         from sentence_transformers import SentenceTransformer
         model = SentenceTransformer("all-MiniLM-L6-v2")
+        print("SentenceTransformer model loaded successfully.")
     return model
 
 
@@ -41,10 +43,12 @@ def get_qdrant_client():
         if not qdrant_url or not qdrant_api_key:
             raise ValueError("Qdrant environment variables are missing.")
 
+        print("Connecting to Qdrant...")
         qdrant_client_instance = QdrantClient(
             url=qdrant_url,
             api_key=qdrant_api_key
         )
+        print("Connected to Qdrant successfully.")
     return qdrant_client_instance
 
 
@@ -57,11 +61,23 @@ def get_openrouter_client():
         if not openrouter_api_key:
             raise ValueError("OPENROUTER_API_KEY is missing.")
 
+        print("Initializing OpenRouter client...")
         openrouter_client_instance = OpenAI(
             api_key=openrouter_api_key,
             base_url="https://openrouter.ai/api/v1"
         )
+        print("OpenRouter client initialized successfully.")
     return openrouter_client_instance
+
+
+@app.on_event("startup")
+def load_resources():
+    try:
+        print("App startup: preloading model...")
+        get_model()
+        print("App startup: model preload complete.")
+    except Exception as e:
+        print(f"App startup: model preload failed: {e}")
 
 
 # ---------------- NEW FEATURE: SCHEME DETECTOR ----------------
@@ -257,7 +273,8 @@ def get_nearby_places(user_query):
 
         return "\n\n".join(results)
 
-    except Exception:
+    except Exception as e:
+        print(f"Nearby places lookup failed: {e}")
         return ""
 
 
@@ -278,30 +295,39 @@ def ask_test(query: Query):
 @app.post("/ask")
 def ask_question(query: Query):
     try:
+        print("Step 1: /ask request received")
+
         original_query = query.query.strip()
 
         if not original_query:
+            print("Step 1.1: empty query")
             return {"response": "Please enter a question."}
 
-        # Translate user query to English for better retrieval
+        print(f"Step 2: original query: {original_query}")
+
         try:
             translated_query = GoogleTranslator(source="auto", target="en").translate(original_query)
-        except Exception:
+            print(f"Step 3: translated query: {translated_query}")
+        except Exception as e:
+            print(f"Step 3 failed: translation error: {e}")
             translated_query = original_query
 
-        # Encode query
+        print("Step 4: encoding query")
         vector = get_model().encode(translated_query)
+        print("Step 4 complete: encoding done")
 
-        # Search Qdrant
+        print("Step 5: querying Qdrant")
         results = get_qdrant_client().query_points(
             collection_name=collection_name,
             query=vector.tolist(),
             limit=2
         )
+        print("Step 5 complete: Qdrant query done")
 
         context = ""
 
         if hasattr(results, "points") and results.points:
+            print(f"Step 6: {len(results.points)} Qdrant points found")
             for hit in results.points:
                 payload = hit.payload or {}
 
@@ -317,6 +343,7 @@ Explanation: {explanation}
 Solution: {solution}
 """
         else:
+            print("Step 6: no Qdrant points found")
             context = "No matching knowledge found in the database."
 
         scheme_info = detect_scheme(original_query)
@@ -325,9 +352,13 @@ Solution: {solution}
         smart_eligibility = smart_eligibility_flow(original_query)
         reward_info = update_rewards(original_query, smart_eligibility, scheme_info)
 
+        print("Step 7: extra feature processing complete")
+
         maps_result = ""
         if any(word in original_query.lower() for word in ["hospital", "bank", "police", "ration", "near", "nearby", "location", "place"]):
+            print("Step 8: fetching nearby places")
             maps_result = get_nearby_places(original_query)
+            print("Step 8 complete: nearby places processed")
 
         prompt = f"""
 You are Sahaya AI, a multilingual government help assistant.
@@ -375,20 +406,24 @@ Explain clearly so common citizens can understand easily.
 Provide step-by-step guidance when relevant.
 """
 
+        print("Step 9: calling OpenRouter")
         response = get_openrouter_client().chat.completions.create(
             model="openrouter/auto",
             messages=[
                 {"role": "user", "content": prompt}
             ]
         )
+        print("Step 9 complete: OpenRouter response received")
 
         answer = response.choices[0].message.content if response.choices else ""
 
         if not answer:
+            print("Step 10: empty answer from OpenRouter")
             return {"response": "I could not generate a response right now. Please try again."}
 
-        # Return answer directly to avoid translation failure on target='auto'
+        print("Step 10 complete: returning final response")
         return {"response": answer}
 
     except Exception as e:
+        print(f"ERROR in /ask: {e}")
         return {"response": f"Backend error: {str(e)}"}
