@@ -247,7 +247,7 @@ export default function App() {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE}/ask-test`, {
+      const response = await fetch(`${API_BASE}/ask`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
