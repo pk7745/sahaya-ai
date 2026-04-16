@@ -110,6 +110,17 @@ const styles = {
     whiteSpace: "pre-wrap",
     lineHeight: 1.7,
   },
+  bubbleWaking: {
+    maxWidth: "80%",
+    background: "#fefce8",
+    color: "#854d0e",
+    padding: "14px 16px",
+    borderRadius: "20px",
+    border: "1px solid #fde68a",
+    whiteSpace: "pre-wrap",
+    lineHeight: 1.7,
+    fontSize: "14px",
+  },
   controls: {
     padding: "18px 20px 20px",
     borderTop: "1px solid #e2e8f0",
@@ -157,6 +168,30 @@ const styles = {
     fontSize: "13px",
     color: "#64748b",
   },
+  statusBar: {
+    fontSize: "12px",
+    padding: "6px 12px",
+    borderRadius: "999px",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "6px",
+    marginTop: "12px",
+  },
+  statusOnline: {
+    background: "#dcfce7",
+    color: "#166534",
+    border: "1px solid #bbf7d0",
+  },
+  statusOffline: {
+    background: "#fee2e2",
+    color: "#991b1b",
+    border: "1px solid #fecaca",
+  },
+  statusWaking: {
+    background: "#fefce8",
+    color: "#854d0e",
+    border: "1px solid #fde68a",
+  },
 };
 
 function extractMapLinks(text) {
@@ -166,6 +201,20 @@ function extractMapLinks(text) {
 
 function cleanTextForSpeech(text) {
   return text.replace(/https?:\/\/\S+/g, "").replace(/\s+/g, " ").trim();
+}
+
+// FIX: fetch with timeout helper
+async function fetchWithTimeout(url, options = {}, timeoutMs = 35000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    clearTimeout(timer);
+    return response;
+  } catch (err) {
+    clearTimeout(timer);
+    throw err;
+  }
 }
 
 export default function App() {
@@ -181,8 +230,26 @@ export default function App() {
   const [autoRead, setAutoRead] = useState(false);
   const [listening, setListening] = useState(false);
   const [voiceLang, setVoiceLang] = useState("en-IN");
+  // FIX: backend status tracking
+  const [backendStatus, setBackendStatus] = useState("checking"); // "online" | "offline" | "waking" | "checking"
   const bottomRef = useRef(null);
   const recognitionRef = useRef(null);
+
+  // FIX: wake-up ping on app load to warm up Render server
+  useEffect(() => {
+    setBackendStatus("waking");
+    fetch(`${API_BASE}/`)
+      .then((res) => {
+        if (res.ok) {
+          setBackendStatus("online");
+        } else {
+          setBackendStatus("offline");
+        }
+      })
+      .catch(() => {
+        setBackendStatus("offline");
+      });
+  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -246,14 +313,31 @@ export default function App() {
     setInput("");
     setLoading(true);
 
-    try {
-      const response = await fetch(`${API_BASE}/ask`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+    // FIX: show a waking message if backend was offline/waking
+    if (backendStatus !== "online") {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "waking",
+          content:
+            "The server is starting up (this can take up to 60 seconds on first use). Please wait...",
         },
-        body: JSON.stringify({ query: text }),
-      });
+      ]);
+    }
+
+    try {
+      // FIX: use fetchWithTimeout instead of plain fetch — 60s for cold starts
+      const response = await fetchWithTimeout(
+        `${API_BASE}/ask`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ query: text }),
+        },
+        60000
+      );
 
       if (!response.ok) {
         throw new Error("Backend request failed");
@@ -263,23 +347,30 @@ export default function App() {
       const assistantText =
         data?.response || "I could not generate a response right now.";
 
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: assistantText },
-      ]);
+      // FIX: remove waking message once real reply arrives
+      setMessages((prev) =>
+        prev
+          .filter((m) => m.role !== "waking")
+          .concat({ role: "assistant", content: assistantText })
+      );
+
+      setBackendStatus("online");
 
       if (autoRead) {
         setTimeout(() => speak(assistantText), 250);
       }
     } catch (error) {
-      setMessages((prev) => [
-        ...prev,
-        {
+      // FIX: remove waking message and show a clear error
+      setMessages((prev) =>
+        prev.filter((m) => m.role !== "waking").concat({
           role: "assistant",
           content:
-            "I could not connect to the backend. Please make sure the backend is live and the API URL is correct.",
-        },
-      ]);
+            error.name === "AbortError"
+              ? "The request timed out. The server may be starting up — please try again in a moment."
+              : "I could not connect to the backend. Please make sure the backend is live and the API URL is correct.",
+        })
+      );
+      setBackendStatus("offline");
     } finally {
       setLoading(false);
     }
@@ -296,6 +387,20 @@ export default function App() {
     ]);
   };
 
+  const statusLabel = {
+    online: "Backend online",
+    offline: "Backend offline",
+    waking: "Waking up server...",
+    checking: "Checking server...",
+  };
+
+  const statusStyle = {
+    online: styles.statusOnline,
+    offline: styles.statusOffline,
+    waking: styles.statusWaking,
+    checking: styles.statusWaking,
+  };
+
   return (
     <div style={styles.app}>
       <div style={styles.container}>
@@ -305,6 +410,25 @@ export default function App() {
             Multilingual government assistance assistant for healthcare,
             education, finance, public services, schemes, rewards, and nearby
             help.
+          </div>
+
+          {/* FIX: backend status indicator */}
+          <div style={{ ...styles.statusBar, ...statusStyle[backendStatus] }}>
+            <span
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: "50%",
+                background:
+                  backendStatus === "online"
+                    ? "#16a34a"
+                    : backendStatus === "offline"
+                    ? "#dc2626"
+                    : "#ca8a04",
+                display: "inline-block",
+              }}
+            />
+            {statusLabel[backendStatus]}
           </div>
 
           <div style={styles.sectionTitle}>Capabilities</div>
@@ -403,6 +527,14 @@ export default function App() {
 
           <div style={styles.chat}>
             {messages.map((message, index) => {
+              if (message.role === "waking") {
+                return (
+                  <div key={index} style={styles.bubbleWrapBot}>
+                    <div style={styles.bubbleWaking}>{message.content}</div>
+                  </div>
+                );
+              }
+
               const mapLinks =
                 message.role === "assistant"
                   ? extractMapLinks(message.content)
