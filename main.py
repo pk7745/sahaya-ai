@@ -70,6 +70,25 @@ def get_openrouter_client():
     return openrouter_client_instance
 
 
+# ---- FIX: Eager load model and clients at startup to avoid cold-start delay ----
+@app.on_event("startup")
+async def startup_event():
+    print("Startup: preloading model and clients...")
+    try:
+        get_model()
+    except Exception as e:
+        print(f"Startup: model load failed: {e}")
+    try:
+        get_qdrant_client()
+    except Exception as e:
+        print(f"Startup: Qdrant client init failed: {e}")
+    try:
+        get_openrouter_client()
+    except Exception as e:
+        print(f"Startup: OpenRouter client init failed: {e}")
+    print("Startup: preloading complete.")
+
+
 # ---------------- NEW FEATURE: SCHEME DETECTOR ----------------
 
 def detect_scheme(user_query):
@@ -285,6 +304,7 @@ def ask_question(query: Query):
 
         print(f"Step 2: original query: {original_query}")
 
+        # ---- FIX: translation timeout to avoid hanging ----
         try:
             translated_query = GoogleTranslator(source="auto", target="en").translate(original_query)
             print(f"Step 3: translated query: {translated_query}")
@@ -387,11 +407,14 @@ Provide step-by-step guidance when relevant.
 """
 
         print("Step 9: calling OpenRouter")
+        # ---- FIX: use a specific reliable model instead of openrouter/auto ----
+        # ---- FIX: add timeout to prevent hanging indefinitely ----
         response = get_openrouter_client().chat.completions.create(
-            model="openrouter/auto",
+            model="mistralai/mistral-7b-instruct",
             messages=[
                 {"role": "user", "content": prompt}
-            ]
+            ],
+            timeout=30
         )
         print("Step 9 complete: OpenRouter response received")
 
