@@ -256,6 +256,11 @@ def root():
     return {"status": "ok", "message": "Sahaya AI backend is running"}
 
 
+@app.post("/ask-test")
+def ask_test(query: Query):
+    return {"response": f"Test working: {query.query}"}
+
+
 @app.post("/ask")
 def ask_question(query: Query):
 
@@ -290,7 +295,10 @@ Solution: {solution}
     location_info = location_help(query.query)
     smart_eligibility = smart_eligibility_flow(query.query)
     reward_info = update_rewards(query.query, smart_eligibility, scheme_info)
-    maps_result = get_nearby_places(query.query)
+
+    maps_result = ""
+    if any(word in query.query.lower() for word in ["hospital", "bank", "police", "ration", "near", "nearby", "location", "place"]):
+        maps_result = get_nearby_places(query.query)
 
     prompt = f"""
 You are Sahaya AI, a multilingual government help assistant.
