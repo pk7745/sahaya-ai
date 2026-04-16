@@ -247,13 +247,19 @@ export default function App() {
     setLoading(true);
 
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+
       const response = await fetch(`${API_BASE}/ask`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ query: text }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error("Backend request failed");
@@ -272,12 +278,16 @@ export default function App() {
         setTimeout(() => speak(assistantText), 250);
       }
     } catch (error) {
+      const errorMessage =
+        error.name === "AbortError"
+          ? "Server took too long to respond. Please try again."
+          : "I could not connect to the backend. Please make sure the backend is live and the API URL is correct.";
+
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
-          content:
-            "I could not connect to the backend. Please make sure the backend is live and the API URL is correct.",
+          content: errorMessage,
         },
       ]);
     } finally {
