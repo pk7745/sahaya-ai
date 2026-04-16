@@ -34,9 +34,16 @@ def get_qdrant_client():
     global qdrant_client_instance
     if qdrant_client_instance is None:
         from qdrant_client import QdrantClient
+
+        qdrant_url = os.getenv("QDRANT_URL")
+        qdrant_api_key = os.getenv("QDRANT_API_KEY")
+
+        if not qdrant_url or not qdrant_api_key:
+            raise ValueError("Qdrant environment variables are missing.")
+
         qdrant_client_instance = QdrantClient(
-            url=os.getenv("QDRANT_URL"),
-            api_key=os.getenv("QDRANT_API_KEY")
+            url=qdrant_url,
+            api_key=qdrant_api_key
         )
     return qdrant_client_instance
 
@@ -45,8 +52,13 @@ def get_openrouter_client():
     global openrouter_client_instance
     if openrouter_client_instance is None:
         from openai import OpenAI
+
+        openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
+        if not openrouter_api_key:
+            raise ValueError("OPENROUTER_API_KEY is missing.")
+
         openrouter_client_instance = OpenAI(
-            api_key=os.getenv("OPENROUTER_API_KEY"),
+            api_key=openrouter_api_key,
             base_url="https://openrouter.ai/api/v1"
         )
     return openrouter_client_instance
@@ -229,6 +241,7 @@ def get_nearby_places(user_query):
         }
 
         response = requests.get(url, params=params, headers=headers, timeout=10)
+        response.raise_for_status()
         data = response.json()
 
         results = []
@@ -238,12 +251,13 @@ def get_nearby_places(user_query):
             lat = place.get("lat", "")
             lon = place.get("lon", "")
 
-            maps_link = f"https://www.google.com/maps?q={lat},{lon}"
-            results.append(f"{name}\nMaps: {maps_link}")
+            if lat and lon:
+                maps_link = f"https://www.google.com/maps?q={lat},{lon}"
+                results.append(f"{name}\nMaps: {maps_link}")
 
         return "\n\n".join(results)
 
-    except:
+    except Exception:
         return ""
 
 
@@ -263,48 +277,63 @@ def ask_test(query: Query):
 
 @app.post("/ask")
 def ask_question(query: Query):
+    try:
+        original_query = query.query.strip()
 
-    translated_query = GoogleTranslator(source="auto", target="en").translate(query.query)
+        if not original_query:
+            return {"response": "Please enter a question."}
 
-    vector = get_model().encode(translated_query)
+        # Translate user query to English for better retrieval
+        try:
+            translated_query = GoogleTranslator(source="auto", target="en").translate(original_query)
+        except Exception:
+            translated_query = original_query
 
-    results = get_qdrant_client().query_points(
-        collection_name=collection_name,
-        query=vector.tolist(),
-        limit=2
-    )
+        # Encode query
+        vector = get_model().encode(translated_query)
 
-    context = ""
+        # Search Qdrant
+        results = get_qdrant_client().query_points(
+            collection_name=collection_name,
+            query=vector.tolist(),
+            limit=2
+        )
 
-    for hit in results.points:
+        context = ""
 
-        category = hit.payload.get("category", "")
-        problem = hit.payload.get("problem", "")
-        explanation = hit.payload.get("explanation", "")
-        solution = hit.payload.get("solutions") or hit.payload.get("solution", "")
+        if hasattr(results, "points") and results.points:
+            for hit in results.points:
+                payload = hit.payload or {}
 
-        context += f"""
+                category = payload.get("category", "")
+                problem = payload.get("problem", "")
+                explanation = payload.get("explanation", "")
+                solution = payload.get("solutions") or payload.get("solution", "")
+
+                context += f"""
 Category: {category}
 Problem: {problem}
 Explanation: {explanation}
 Solution: {solution}
 """
+        else:
+            context = "No matching knowledge found in the database."
 
-    scheme_info = detect_scheme(query.query)
-    eligibility = eligibility_question(query.query)
-    location_info = location_help(query.query)
-    smart_eligibility = smart_eligibility_flow(query.query)
-    reward_info = update_rewards(query.query, smart_eligibility, scheme_info)
+        scheme_info = detect_scheme(original_query)
+        eligibility = eligibility_question(original_query)
+        location_info = location_help(original_query)
+        smart_eligibility = smart_eligibility_flow(original_query)
+        reward_info = update_rewards(original_query, smart_eligibility, scheme_info)
 
-    maps_result = ""
-    if any(word in query.query.lower() for word in ["hospital", "bank", "police", "ration", "near", "nearby", "location", "place"]):
-        maps_result = get_nearby_places(query.query)
+        maps_result = ""
+        if any(word in original_query.lower() for word in ["hospital", "bank", "police", "ration", "near", "nearby", "location", "place"]):
+            maps_result = get_nearby_places(original_query)
 
-    prompt = f"""
+        prompt = f"""
 You are Sahaya AI, a multilingual government help assistant.
 
 User question:
-{query.query}
+{original_query}
 
 Helpful government information:
 {context}
@@ -346,15 +375,20 @@ Explain clearly so common citizens can understand easily.
 Provide step-by-step guidance when relevant.
 """
 
-    response = get_openrouter_client().chat.completions.create(
-        model="openrouter/auto",
-        messages=[
-            {"role": "user", "content": prompt}
-        ]
-    )
+        response = get_openrouter_client().chat.completions.create(
+            model="openrouter/auto",
+            messages=[
+                {"role": "user", "content": prompt}
+            ]
+        )
 
-    answer = response.choices[0].message.content
+        answer = response.choices[0].message.content if response.choices else ""
 
-    final_answer = GoogleTranslator(source="en", target="auto").translate(answer)
+        if not answer:
+            return {"response": "I could not generate a response right now. Please try again."}
 
-    return {"response": final_answer}
+        # Return answer directly to avoid translation failure on target='auto'
+        return {"response": answer}
+
+    except Exception as e:
+        return {"response": f"Backend error: {str(e)}"}
