@@ -390,7 +390,13 @@ def ask_question(query: Query):
             print("Step 6 complete: nearby places processed")
 
         prompt = f"""
-You are Sahaya AI, a multilingual government help assistant.
+You are Sahaya AI, a multilingual government help assistant for Indian citizens.
+
+Your job:
+- Give practical, accurate, citizen-friendly guidance.
+- Reply in the same language as the user whenever possible.
+- Make the answer feel helpful, confident, and real-world practical.
+- Prefer clear steps over generic explanation.
 
 User question:
 {original_query}
@@ -422,18 +428,21 @@ Best matched scheme based on available details:
 User rewards (IMPORTANT - include if available):
 {reward_info}
 
-Instructions:
-- Reply in the same language as the user when possible.
-- If the user query is unclear, ONLY ask follow-up questions.
-- If schemes are available, ALWAYS mention them clearly.
-- If location help is available, ALWAYS include it.
-- If real nearby places are available, include them clearly.
-- If important eligibility details are missing, ask only those missing questions.
-- If the user already provided details, do not ask again.
-- If a scheme is matched, mention it clearly.
-- Keep answers simple and direct.
-- Do not ask confirmation if user already provided information.
+Response rules:
+- Reply in the user's language when possible.
+- Start with the most useful direct answer first.
+- If schemes are available, mention them clearly and naturally.
+- If location help is available, include it clearly.
+- If real nearby places are available, mention them clearly.
+- If the user already provided enough details, do not ask repeated questions.
+- If important eligibility details are missing, ask only those missing details.
+- If a scheme is matched, say why it may fit the user.
+- Use short sections or bullet points only when they improve clarity.
 - Keep the response concise and under 250 words unless the user asks for more detail.
+- Sound practical, warm, and trustworthy.
+- Avoid robotic phrasing.
+- Avoid saying you are just an AI model.
+- When useful, end with one smart next step the user should do now.
 
 Explain clearly so common citizens can understand easily.
 Provide step-by-step guidance when relevant.
@@ -441,7 +450,7 @@ Provide step-by-step guidance when relevant.
 
         print("Step 7: calling OpenRouter")
         response = get_openrouter_client().chat.completions.create(
-            model="openrouter/free",
+            model="meta-llama/llama-3.1-8b-instruct:free",
             messages=[
                 {"role": "user", "content": prompt}
             ],
@@ -449,12 +458,13 @@ Provide step-by-step guidance when relevant.
             timeout=25
         )
         print("Step 7 complete: OpenRouter response received")
+        print("OpenRouter raw choices:", response.choices)
 
         answer = response.choices[0].message.content if response.choices else ""
 
-        if not answer:
+        if not answer or not answer.strip():
             print("Step 8: empty answer from OpenRouter")
-            return {"response": "I could not generate a response right now. Please try again."}
+            answer = "I’m here to help. Please rephrase your question once, and I’ll guide you clearly."
 
         print("Step 8 complete: returning final response")
         return {"response": answer}
