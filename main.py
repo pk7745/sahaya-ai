@@ -4,6 +4,7 @@ from pydantic import BaseModel
 from deep_translator import GoogleTranslator
 import os
 import requests
+import re
 
 app = FastAPI()
 
@@ -17,20 +18,10 @@ app.add_middleware(
 
 collection_name = "knowledge_base"
 
-model = None
 qdrant_client_instance = None
 openrouter_client_instance = None
 
-
-def get_model():
-    global model
-    if model is None:
-        print("Loading SentenceTransformer model...")
-        from sentence_transformers import SentenceTransformer
-        model = SentenceTransformer("all-MiniLM-L6-v2")
-        print("SentenceTransformer model loaded successfully.")
-    return model
-
+# ---------------- CLIENTS ----------------
 
 def get_qdrant_client():
     global qdrant_client_instance
@@ -70,14 +61,9 @@ def get_openrouter_client():
     return openrouter_client_instance
 
 
-# ---- FIX: Eager load model and clients at startup to avoid cold-start delay ----
 @app.on_event("startup")
 async def startup_event():
-    print("Startup: preloading model and clients...")
-    try:
-        get_model()
-    except Exception as e:
-        print(f"Startup: model load failed: {e}")
+    print("Startup: lightweight mode enabled (no local embedding model preload)")
     try:
         get_qdrant_client()
     except Exception as e:
@@ -86,10 +72,9 @@ async def startup_event():
         get_openrouter_client()
     except Exception as e:
         print(f"Startup: OpenRouter client init failed: {e}")
-    print("Startup: preloading complete.")
 
 
-# ---------------- NEW FEATURE: SCHEME DETECTOR ----------------
+# ---------------- SCHEME DETECTOR ----------------
 
 def detect_scheme(user_query):
     q = user_query.lower()
@@ -108,7 +93,7 @@ def detect_scheme(user_query):
     return ""
 
 
-# ---------------- NEW FEATURE: ELIGIBILITY QUESTIONS ----------------
+# ---------------- ELIGIBILITY QUESTIONS ----------------
 
 def eligibility_question(user_query):
     q = user_query.lower()
@@ -119,7 +104,7 @@ def eligibility_question(user_query):
     return ""
 
 
-# ---------------- NEW FEATURE: SIMPLE LOCATION HELP ----------------
+# ---------------- LOCATION HELP ----------------
 
 def location_help(user_query):
     q = user_query.lower()
@@ -136,7 +121,7 @@ def location_help(user_query):
     return ""
 
 
-# ---------------- NEW FEATURE: SMART ELIGIBILITY CHECKER ----------------
+# ---------------- SMART ELIGIBILITY ----------------
 
 def extract_user_details(user_query):
     q = user_query.lower()
@@ -212,7 +197,7 @@ def smart_eligibility_flow(user_query):
     }
 
 
-# ---------------- NEW FEATURE: REWARD SYSTEM ----------------
+# ---------------- REWARD SYSTEM ----------------
 
 user_rewards = {
     "points": 0,
@@ -241,7 +226,7 @@ Reward Update:
     return reward_message
 
 
-# ---------------- NEW FEATURE: NOMINATIM MAP SEARCH ----------------
+# ---------------- MAP SEARCH ----------------
 
 def get_nearby_places(user_query):
     try:
@@ -277,6 +262,81 @@ def get_nearby_places(user_query):
         return ""
 
 
+# ---------------- LIGHTWEIGHT QDRANT RETRIEVAL ----------------
+
+def tokenize(text):
+    return set(re.findall(r"\b[a-zA-Z0-9]{3,}\b", text.lower()))
+
+
+def lightweight_qdrant_context(user_query, limit=2, scan_limit=30):
+    """
+    Lightweight fallback retrieval:
+    - No sentence-transformers
+    - No torch
+    - Pull a few payloads from Qdrant
+    - Rank by keyword overlap
+    """
+    try:
+        client = get_qdrant_client()
+
+        scroll_result = client.scroll(
+            collection_name=collection_name,
+            limit=scan_limit,
+            with_payload=True,
+            with_vectors=False
+        )
+
+        points = scroll_result[0] if isinstance(scroll_result, tuple) else scroll_result
+        if not points:
+            return "No matching knowledge found in the database."
+
+        query_tokens = tokenize(user_query)
+        scored = []
+
+        for point in points:
+            payload = point.payload or {}
+
+            combined_text = " ".join([
+                str(payload.get("category", "")),
+                str(payload.get("problem", "")),
+                str(payload.get("explanation", "")),
+                str(payload.get("solutions", "")),
+                str(payload.get("solution", "")),
+            ])
+
+            doc_tokens = tokenize(combined_text)
+            score = len(query_tokens.intersection(doc_tokens))
+
+            if score > 0:
+                scored.append((score, payload))
+
+        scored.sort(key=lambda x: x[0], reverse=True)
+        top_hits = scored[:limit]
+
+        if not top_hits:
+            return "No matching knowledge found in the database."
+
+        context_parts = []
+        for _, payload in top_hits:
+            category = payload.get("category", "")
+            problem = payload.get("problem", "")
+            explanation = payload.get("explanation", "")
+            solution = payload.get("solutions") or payload.get("solution", "")
+
+            context_parts.append(f"""
+Category: {category}
+Problem: {problem}
+Explanation: {explanation}
+Solution: {solution}
+""")
+
+        return "\n".join(context_parts).strip()
+
+    except Exception as e:
+        print(f"Lightweight Qdrant retrieval failed: {e}")
+        return "No matching knowledge found in the database."
+
+
 class Query(BaseModel):
     query: str
 
@@ -304,7 +364,6 @@ def ask_question(query: Query):
 
         print(f"Step 2: original query: {original_query}")
 
-        # ---- FIX: translation timeout to avoid hanging ----
         try:
             translated_query = GoogleTranslator(source="auto", target="en").translate(original_query)
             print(f"Step 3: translated query: {translated_query}")
@@ -312,39 +371,9 @@ def ask_question(query: Query):
             print(f"Step 3 failed: translation error: {e}")
             translated_query = original_query
 
-        print("Step 4: encoding query")
-        vector = get_model().encode(translated_query)
-        print("Step 4 complete: encoding done")
-
-        print("Step 5: querying Qdrant")
-        results = get_qdrant_client().query_points(
-            collection_name=collection_name,
-            query=vector.tolist(),
-            limit=2
-        )
-        print("Step 5 complete: Qdrant query done")
-
-        context = ""
-
-        if hasattr(results, "points") and results.points:
-            print(f"Step 6: {len(results.points)} Qdrant points found")
-            for hit in results.points:
-                payload = hit.payload or {}
-
-                category = payload.get("category", "")
-                problem = payload.get("problem", "")
-                explanation = payload.get("explanation", "")
-                solution = payload.get("solutions") or payload.get("solution", "")
-
-                context += f"""
-Category: {category}
-Problem: {problem}
-Explanation: {explanation}
-Solution: {solution}
-"""
-        else:
-            print("Step 6: no Qdrant points found")
-            context = "No matching knowledge found in the database."
+        print("Step 4: lightweight knowledge retrieval")
+        context = lightweight_qdrant_context(translated_query, limit=2, scan_limit=30)
+        print("Step 4 complete: lightweight retrieval done")
 
         scheme_info = detect_scheme(original_query)
         eligibility = eligibility_question(original_query)
@@ -352,19 +381,22 @@ Solution: {solution}
         smart_eligibility = smart_eligibility_flow(original_query)
         reward_info = update_rewards(original_query, smart_eligibility, scheme_info)
 
-        print("Step 7: extra feature processing complete")
+        print("Step 5: extra feature processing complete")
 
         maps_result = ""
         if any(word in original_query.lower() for word in ["hospital", "bank", "police", "ration", "near", "nearby", "location", "place"]):
-            print("Step 8: fetching nearby places")
+            print("Step 6: fetching nearby places")
             maps_result = get_nearby_places(original_query)
-            print("Step 8 complete: nearby places processed")
+            print("Step 6 complete: nearby places processed")
 
         prompt = f"""
 You are Sahaya AI, a multilingual government help assistant.
 
 User question:
 {original_query}
+
+Translated English query:
+{translated_query}
 
 Helpful government information:
 {context}
@@ -391,6 +423,7 @@ User rewards (IMPORTANT - include if available):
 {reward_info}
 
 Instructions:
+- Reply in the same language as the user when possible.
 - If the user query is unclear, ONLY ask follow-up questions.
 - If schemes are available, ALWAYS mention them clearly.
 - If location help is available, ALWAYS include it.
@@ -398,7 +431,6 @@ Instructions:
 - If important eligibility details are missing, ask only those missing questions.
 - If the user already provided details, do not ask again.
 - If a scheme is matched, mention it clearly.
-- Only give detailed solutions when user provides clear context.
 - Keep answers simple and direct.
 - Do not ask confirmation if user already provided information.
 
@@ -406,25 +438,23 @@ Explain clearly so common citizens can understand easily.
 Provide step-by-step guidance when relevant.
 """
 
-        print("Step 9: calling OpenRouter")
-        # ---- FIX: use a specific reliable model instead of openrouter/auto ----
-        # ---- FIX: add timeout to prevent hanging indefinitely ----
+        print("Step 7: calling OpenRouter")
         response = get_openrouter_client().chat.completions.create(
             model="mistralai/mistral-7b-instruct",
             messages=[
                 {"role": "user", "content": prompt}
             ],
-            timeout=30
+            timeout=25
         )
-        print("Step 9 complete: OpenRouter response received")
+        print("Step 7 complete: OpenRouter response received")
 
         answer = response.choices[0].message.content if response.choices else ""
 
         if not answer:
-            print("Step 10: empty answer from OpenRouter")
+            print("Step 8: empty answer from OpenRouter")
             return {"response": "I could not generate a response right now. Please try again."}
 
-        print("Step 10 complete: returning final response")
+        print("Step 8 complete: returning final response")
         return {"response": answer}
 
     except Exception as e:
