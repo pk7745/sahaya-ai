@@ -439,7 +439,7 @@ Explain clearly so common citizens can understand easily.
 Provide step-by-step guidance when relevant.
 """
 
-       response = get_openrouter_client().chat.completions.create(
+response = get_openrouter_client().chat.completions.create(
     model="openrouter/free",
     messages=[
         {"role": "user", "content": prompt}
