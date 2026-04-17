@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
 const API_BASE = "https://sahaya-ai-3ss2.onrender.com";
-
 const styles = {
   app: {
     minHeight: "100vh",
