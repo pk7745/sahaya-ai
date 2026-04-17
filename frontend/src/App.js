@@ -1,251 +1,69 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import Vapi from "@vapi-ai/web";
 
-const API_BASE = import.meta.env.VITE_API_BASE;
-const VAPI_PUBLIC_KEY = import.meta.env.VITE_VAPI_PUBLIC_KEY;
-const VAPI_ASSISTANT_ID = import.meta.env.VITE_VAPI_ASSISTANT_ID;
+const API_BASE =
+  import.meta.env.VITE_API_BASE || "https://sahaya-ai-3ss2.onrender.com";
+
+const VAPI_PUBLIC_KEY =
+  import.meta.env.VITE_VAPI_PUBLIC_KEY || "61488fad-b9ee-4287-9917-691d2e1f202b";
+
+const VAPI_ASSISTANT_ID =
+  import.meta.env.VITE_VAPI_ASSISTANT_ID || "9f2a4ad1-c6d3-4520-a766-f8ed67dc483d";
 
 const styles = {
   app: {
     minHeight: "100vh",
-    background:
-      "radial-gradient(circle at top left, #f8fafc 0%, #eef2ff 35%, #e2e8f0 100%)",
-    padding: "24px",
-    fontFamily: "Arial, sans-serif",
-    color: "#0f172a",
+    background: "#f7f7f8",
+    fontFamily: "Inter, Arial, sans-serif",
+    color: "#111827",
   },
-  container: {
-    maxWidth: "1220px",
-    margin: "0 auto",
+  shell: {
     display: "grid",
-    gridTemplateColumns: "340px 1fr",
-    gap: "22px",
+    gridTemplateColumns: "320px 1fr",
+    minHeight: "100vh",
   },
   sidebar: {
-    background: "rgba(255,255,255,0.92)",
-    backdropFilter: "blur(10px)",
-    borderRadius: "28px",
-    padding: "22px",
-    boxShadow: "0 18px 60px rgba(15, 23, 42, 0.08)",
-    border: "1px solid #e2e8f0",
-    height: "fit-content",
-  },
-  main: {
-    background: "rgba(255,255,255,0.94)",
-    backdropFilter: "blur(10px)",
-    borderRadius: "28px",
-    boxShadow: "0 18px 60px rgba(15, 23, 42, 0.08)",
-    border: "1px solid #e2e8f0",
+    background: "#ffffff",
+    borderRight: "1px solid #e5e7eb",
+    padding: "20px 18px",
     display: "flex",
     flexDirection: "column",
-    minHeight: "86vh",
-    overflow: "hidden",
+    gap: "18px",
+  },
+  brandWrap: {
+    paddingBottom: "10px",
+    borderBottom: "1px solid #eef2f7",
   },
   title: {
-    fontSize: "30px",
+    fontSize: "34px",
     fontWeight: "800",
     marginBottom: "8px",
-    letterSpacing: "-0.02em",
+    letterSpacing: "-0.03em",
+    color: "#111827",
   },
   subtitle: {
     fontSize: "14px",
-    color: "#475569",
-    lineHeight: 1.65,
+    color: "#6b7280",
+    lineHeight: 1.6,
   },
   sectionTitle: {
     fontSize: "15px",
     fontWeight: "800",
     marginBottom: "10px",
-    marginTop: "22px",
-    color: "#0f172a",
+    color: "#111827",
   },
-  pill: {
-    display: "inline-block",
-    background: "#f8fafc",
-    border: "1px solid #cbd5e1",
-    color: "#334155",
-    padding: "7px 11px",
-    borderRadius: "999px",
-    fontSize: "12px",
-    margin: "4px 6px 0 0",
-    fontWeight: "600",
-  },
-  quickButton: {
-    width: "100%",
-    textAlign: "left",
-    padding: "13px 15px",
-    borderRadius: "16px",
-    border: "1px solid #dbe4ee",
-    background: "#ffffff",
-    cursor: "pointer",
-    marginBottom: "10px",
-    fontSize: "14px",
-    fontWeight: "600",
-    boxShadow: "0 6px 18px rgba(15, 23, 42, 0.03)",
-  },
-  header: {
-    padding: "24px",
-    borderBottom: "1px solid #e2e8f0",
-    background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
-  },
-  heroRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    gap: "16px",
-    alignItems: "flex-start",
-    flexWrap: "wrap",
-  },
-  heroCard: {
-    flex: 1,
-    minWidth: "220px",
-  },
-  voicePanel: {
-    minWidth: "265px",
-    background: "#f8fafc",
-    border: "1px solid #e2e8f0",
-    borderRadius: "20px",
-    padding: "14px",
-  },
-  statText: {
-    fontSize: "12px",
-    color: "#64748b",
-    marginTop: "6px",
-    lineHeight: 1.5,
-    wordBreak: "break-word",
-  },
-  chat: {
-    flex: 1,
-    padding: "22px",
-    overflowY: "auto",
-    display: "flex",
-    flexDirection: "column",
-    gap: "14px",
-    background:
-      "linear-gradient(180deg, rgba(248,250,252,0.7) 0%, rgba(255,255,255,0.95) 100%)",
-  },
-  bubbleWrapUser: {
-    display: "flex",
-    justifyContent: "flex-end",
-  },
-  bubbleWrapBot: {
-    display: "flex",
-    justifyContent: "flex-start",
-  },
-  bubbleUser: {
-    maxWidth: "82%",
-    background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
-    color: "#fff",
-    padding: "15px 17px",
-    borderRadius: "22px 22px 8px 22px",
-    whiteSpace: "pre-wrap",
-    lineHeight: 1.7,
-    boxShadow: "0 10px 25px rgba(15, 23, 42, 0.18)",
-  },
-  bubbleBot: {
-    maxWidth: "82%",
-    background: "#ffffff",
-    color: "#0f172a",
-    padding: "15px 17px",
-    borderRadius: "22px 22px 22px 8px",
-    border: "1px solid #e2e8f0",
-    whiteSpace: "pre-wrap",
-    lineHeight: 1.7,
-    boxShadow: "0 10px 25px rgba(15, 23, 42, 0.05)",
-  },
-  bubbleSystem: {
-    maxWidth: "82%",
-    background: "#fefce8",
-    color: "#854d0e",
-    padding: "14px 16px",
-    borderRadius: "20px",
-    border: "1px solid #fde68a",
-    whiteSpace: "pre-wrap",
-    lineHeight: 1.7,
-    fontSize: "14px",
-  },
-  controls: {
-    padding: "18px 20px 20px",
-    borderTop: "1px solid #e2e8f0",
-    background: "#ffffff",
-  },
-  inputRow: {
-    display: "flex",
-    gap: "10px",
-    marginBottom: "12px",
-  },
-  input: {
-    flex: 1,
-    padding: "14px 16px",
-    borderRadius: "16px",
-    border: "1px solid #cbd5e1",
-    fontSize: "15px",
-    outline: "none",
-    background: "#fff",
-  },
-  button: {
-    padding: "12px 18px",
-    borderRadius: "16px",
-    border: "none",
-    background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
-    color: "#fff",
-    cursor: "pointer",
-    fontSize: "14px",
-    fontWeight: "700",
-    boxShadow: "0 10px 20px rgba(15, 23, 42, 0.12)",
-  },
-  secondaryButton: {
-    padding: "10px 14px",
-    borderRadius: "14px",
-    border: "1px solid #cbd5e1",
-    background: "#fff",
-    color: "#0f172a",
-    cursor: "pointer",
-    fontSize: "14px",
-    marginRight: "8px",
-    marginTop: "8px",
-    fontWeight: "600",
-  },
-  primaryVoiceButton: {
-    padding: "12px 16px",
-    borderRadius: "16px",
-    border: "none",
-    background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
-    color: "#fff",
-    cursor: "pointer",
-    fontSize: "14px",
-    fontWeight: "700",
-    marginRight: "8px",
-    marginTop: "8px",
-    boxShadow: "0 10px 22px rgba(37, 99, 235, 0.2)",
-  },
-  dangerButton: {
-    padding: "12px 16px",
-    borderRadius: "16px",
-    border: "1px solid #fecaca",
-    background: "#fff1f2",
-    color: "#991b1b",
-    cursor: "pointer",
-    fontSize: "14px",
-    fontWeight: "700",
-    marginTop: "8px",
-  },
-  footerRow: {
+  statusRow: {
     display: "flex",
     flexWrap: "wrap",
     gap: "8px",
   },
-  small: {
-    fontSize: "13px",
-    color: "#64748b",
-  },
   statusBar: {
     fontSize: "12px",
-    padding: "7px 12px",
+    padding: "8px 12px",
     borderRadius: "999px",
     display: "inline-flex",
     alignItems: "center",
     gap: "7px",
-    marginTop: "12px",
     fontWeight: "700",
   },
   statusOnline: {
@@ -259,29 +77,204 @@ const styles = {
     border: "1px solid #fecaca",
   },
   statusWaking: {
-    background: "#fefce8",
-    color: "#854d0e",
+    background: "#fef3c7",
+    color: "#92400e",
     border: "1px solid #fde68a",
   },
-  transcriptBox: {
-    marginTop: "12px",
+  capabilities: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "8px",
+  },
+  pill: {
+    background: "#f9fafb",
+    border: "1px solid #d1d5db",
+    color: "#374151",
+    padding: "8px 12px",
+    borderRadius: "999px",
+    fontSize: "12px",
+    fontWeight: "600",
+  },
+  quickButton: {
+    width: "100%",
+    textAlign: "left",
+    padding: "14px 14px",
+    borderRadius: "14px",
+    border: "1px solid #e5e7eb",
+    background: "#ffffff",
+    cursor: "pointer",
+    marginBottom: "10px",
+    fontSize: "14px",
+    fontWeight: "700",
+    color: "#111827",
+  },
+  small: {
+    fontSize: "13px",
+    color: "#6b7280",
+    lineHeight: 1.5,
+  },
+  primaryVoiceButton: {
+    padding: "12px 16px",
+    borderRadius: "14px",
+    border: "none",
+    background: "#111827",
+    color: "#fff",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "700",
+    marginRight: "8px",
+  },
+  dangerButton: {
+    padding: "12px 16px",
+    borderRadius: "14px",
+    border: "1px solid #fecaca",
+    background: "#fff1f2",
+    color: "#991b1b",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "700",
+  },
+  secondaryButton: {
+    padding: "10px 14px",
+    borderRadius: "12px",
+    border: "1px solid #d1d5db",
     background: "#fff",
-    border: "1px solid #e2e8f0",
-    borderRadius: "16px",
+    color: "#111827",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "600",
+  },
+  transcriptBox: {
+    marginTop: "10px",
+    background: "#f9fafb",
+    border: "1px solid #e5e7eb",
+    borderRadius: "14px",
     padding: "12px",
-    minHeight: "66px",
+    minHeight: "70px",
   },
   transcriptLabel: {
     fontSize: "12px",
-    color: "#64748b",
+    color: "#6b7280",
     fontWeight: "700",
     marginBottom: "6px",
   },
   transcriptText: {
     fontSize: "13px",
-    color: "#0f172a",
+    color: "#111827",
     lineHeight: 1.6,
     whiteSpace: "pre-wrap",
+  },
+  main: {
+    display: "flex",
+    flexDirection: "column",
+    minHeight: "100vh",
+    background: "#ffffff",
+  },
+  topBar: {
+    padding: "18px 24px",
+    borderBottom: "1px solid #e5e7eb",
+    background: "#ffffff",
+  },
+  topTitle: {
+    fontSize: "28px",
+    fontWeight: "800",
+    marginBottom: "6px",
+    letterSpacing: "-0.03em",
+  },
+  topSubtitle: {
+    fontSize: "14px",
+    color: "#6b7280",
+    lineHeight: 1.6,
+  },
+  voiceCard: {
+    marginTop: "14px",
+    background: "#f9fafb",
+    border: "1px solid #e5e7eb",
+    borderRadius: "16px",
+    padding: "14px",
+  },
+  chat: {
+    flex: 1,
+    padding: "24px",
+    overflowY: "auto",
+    display: "flex",
+    flexDirection: "column",
+    gap: "18px",
+    background: "#ffffff",
+  },
+  bubbleWrapUser: {
+    display: "flex",
+    justifyContent: "flex-end",
+  },
+  bubbleWrapBot: {
+    display: "flex",
+    justifyContent: "flex-start",
+  },
+  bubbleUser: {
+    maxWidth: "78%",
+    background: "#111827",
+    color: "#fff",
+    padding: "16px 18px",
+    borderRadius: "18px 18px 6px 18px",
+    whiteSpace: "pre-wrap",
+    lineHeight: 1.75,
+    fontSize: "15px",
+  },
+  bubbleBot: {
+    maxWidth: "78%",
+    background: "#f9fafb",
+    color: "#111827",
+    padding: "16px 18px",
+    borderRadius: "18px 18px 18px 6px",
+    border: "1px solid #e5e7eb",
+    whiteSpace: "pre-wrap",
+    lineHeight: 1.75,
+    fontSize: "15px",
+  },
+  bubbleSystem: {
+    maxWidth: "78%",
+    background: "#fef3c7",
+    color: "#92400e",
+    padding: "14px 16px",
+    borderRadius: "16px",
+    border: "1px solid #fde68a",
+    whiteSpace: "pre-wrap",
+    lineHeight: 1.7,
+    fontSize: "14px",
+  },
+  controls: {
+    padding: "18px 24px 24px",
+    borderTop: "1px solid #e5e7eb",
+    background: "#ffffff",
+  },
+  inputRow: {
+    display: "flex",
+    gap: "12px",
+    marginBottom: "12px",
+  },
+  input: {
+    flex: 1,
+    padding: "16px 18px",
+    borderRadius: "16px",
+    border: "1px solid #d1d5db",
+    fontSize: "15px",
+    outline: "none",
+    background: "#fff",
+  },
+  sendButton: {
+    padding: "14px 20px",
+    borderRadius: "16px",
+    border: "none",
+    background: "#111827",
+    color: "#fff",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "700",
+  },
+  footerRow: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "8px",
   },
 };
 
@@ -351,105 +344,123 @@ export default function App() {
   }, [messages, loading, liveUserTranscript, liveAssistantTranscript]);
 
   useEffect(() => {
-    setBackendStatus("waking");
-    fetch(`${API_BASE}/`)
-      .then((res) => {
-        setBackendStatus(res.ok ? "online" : "offline");
-      })
-      .catch(() => setBackendStatus("offline"));
+    const checkBackend = async () => {
+      try {
+        setBackendStatus("waking");
+        const response = await fetchWithTimeout(`${API_BASE}/`, {}, 20000);
+        setBackendStatus(response.ok ? "online" : "offline");
+      } catch (error) {
+        console.error("Backend ping failed:", error);
+        setBackendStatus("offline");
+      }
+    };
+
+    checkBackend();
   }, []);
 
   useEffect(() => {
-    if (!VAPI_PUBLIC_KEY || !VAPI_ASSISTANT_ID) {
-      setLastVoiceNote("Missing Vapi environment variables.");
-      return;
+    console.log("API_BASE:", API_BASE);
+    console.log("VAPI_PUBLIC_KEY:", VAPI_PUBLIC_KEY);
+    console.log("VAPI_ASSISTANT_ID:", VAPI_ASSISTANT_ID);
+  }, []);
+
+  useEffect(() => {
+    try {
+      if (!VAPI_PUBLIC_KEY || !VAPI_ASSISTANT_ID) {
+        setLastVoiceNote("Vapi credentials are missing.");
+        return;
+      }
+
+      const vapi = new Vapi(VAPI_PUBLIC_KEY);
+      vapiRef.current = vapi;
+      setLastVoiceNote("Vapi initialized successfully.");
+
+      const pushUniqueTranscript = (role, text, idHint) => {
+        const safeText = (text || "").trim();
+        if (!safeText) return;
+
+        const key = `${role}:${idHint || safeText}`;
+        if (handledTranscriptIds.current.has(key)) return;
+        handledTranscriptIds.current.add(key);
+
+        setMessages((prev) => [...prev, { role, content: safeText }]);
+      };
+
+      vapi.on("call-start", () => {
+        setVoiceActive(true);
+        setVoiceStatus("active");
+        setLastVoiceNote("Voice conversation started.");
+      });
+
+      vapi.on("call-end", () => {
+        setVoiceActive(false);
+        setVoiceStatus("idle");
+        setLastVoiceNote("Voice conversation ended.");
+        setLiveUserTranscript("");
+        setLiveAssistantTranscript("");
+      });
+
+      vapi.on("speech-start", () => {
+        setLastVoiceNote("Assistant is speaking...");
+      });
+
+      vapi.on("speech-end", () => {
+        setLastVoiceNote("Assistant finished speaking.");
+      });
+
+      vapi.on("message", (msg) => {
+        if (!msg) return;
+
+        if (msg.type === "transcript") {
+          const transcriptText = (msg.transcript || "").trim();
+          const transcriptRole = msg.role || "assistant";
+
+          if (transcriptRole === "user") {
+            setLiveUserTranscript(transcriptText);
+          } else if (transcriptRole === "assistant") {
+            setLiveAssistantTranscript(transcriptText);
+          }
+
+          if (transcriptText && msg.transcriptType === "final") {
+            pushUniqueTranscript(
+              transcriptRole,
+              transcriptText,
+              msg.timestamp || msg.id || transcriptText
+            );
+          }
+        }
+
+        if (msg.type === "function-call" || msg.type === "tool-calls") {
+          setLastVoiceNote("Assistant is using a tool...");
+        }
+      });
+
+      vapi.on("error", (error) => {
+        console.error("Vapi error:", error);
+        setVoiceActive(false);
+        setVoiceStatus("error");
+        setLastVoiceNote("Voice error occurred. Please try again.");
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "assistant",
+            content:
+              "Voice service had an issue. You can still continue using text chat.",
+          },
+        ]);
+      });
+
+      return () => {
+        try {
+          vapi.stop();
+        } catch (e) {
+          console.error("Error stopping Vapi on cleanup:", e);
+        }
+      };
+    } catch (error) {
+      console.error("Vapi initialization failed:", error);
+      setLastVoiceNote("Vapi initialization failed.");
     }
-
-    const vapi = new Vapi(VAPI_PUBLIC_KEY);
-    vapiRef.current = vapi;
-
-    const pushUniqueTranscript = (role, text, idHint) => {
-      const safeText = (text || "").trim();
-      if (!safeText) return;
-
-      const key = `${role}:${idHint || safeText}`;
-      if (handledTranscriptIds.current.has(key)) return;
-      handledTranscriptIds.current.add(key);
-
-      setMessages((prev) => [...prev, { role, content: safeText }]);
-    };
-
-    vapi.on("call-start", () => {
-      setVoiceActive(true);
-      setVoiceStatus("active");
-      setLastVoiceNote("Voice conversation started.");
-    });
-
-    vapi.on("call-end", () => {
-      setVoiceActive(false);
-      setVoiceStatus("idle");
-      setLastVoiceNote("Voice conversation ended.");
-      setLiveUserTranscript("");
-      setLiveAssistantTranscript("");
-    });
-
-    vapi.on("speech-start", () => {
-      setLastVoiceNote("Assistant is speaking...");
-    });
-
-    vapi.on("speech-end", () => {
-      setLastVoiceNote("Assistant finished speaking.");
-    });
-
-    vapi.on("message", (msg) => {
-      if (!msg) return;
-
-      if (msg.type === "transcript") {
-        const transcriptText = (msg.transcript || "").trim();
-        const transcriptRole = msg.role || "assistant";
-
-        if (transcriptRole === "user") {
-          setLiveUserTranscript(transcriptText);
-        } else if (transcriptRole === "assistant") {
-          setLiveAssistantTranscript(transcriptText);
-        }
-
-        if (transcriptText && msg.transcriptType === "final") {
-          pushUniqueTranscript(
-            transcriptRole,
-            transcriptText,
-            msg.timestamp || msg.id || transcriptText
-          );
-        }
-      }
-
-      if (msg.type === "function-call" || msg.type === "tool-calls") {
-        setLastVoiceNote("Assistant is using a tool...");
-      }
-    });
-
-    vapi.on("error", (error) => {
-      console.error("Vapi error:", error);
-      setVoiceActive(false);
-      setVoiceStatus("error");
-      setLastVoiceNote("Voice error occurred. Please try again.");
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content:
-            "Voice service had an issue. You can still continue using text chat.",
-        },
-      ]);
-    });
-
-    return () => {
-      try {
-        vapi.stop();
-      } catch (e) {
-        console.error("Error stopping Vapi on cleanup:", e);
-      }
-    };
   }, []);
 
   const startVapiVoice = async () => {
@@ -530,6 +541,7 @@ export default function App() {
 
       setBackendStatus("online");
     } catch (error) {
+      console.error("Chat request failed:", error);
       setMessages((prev) =>
         prev.filter((m) => m.role !== "system").concat({
           role: "assistant",
@@ -561,171 +573,168 @@ export default function App() {
 
   return (
     <div style={styles.app}>
-      <div style={styles.container}>
-        <div style={styles.sidebar}>
-          <div style={styles.title}>Sahaya AI</div>
-          <div style={styles.subtitle}>
-            Multilingual government assistance assistant for healthcare,
-            education, finance, public services, schemes, rewards, nearby help,
-            and live voice conversations.
+      <div style={styles.shell}>
+        <aside style={styles.sidebar}>
+          <div style={styles.brandWrap}>
+            <div style={styles.title}>Sahaya AI</div>
+            <div style={styles.subtitle}>
+              Multilingual government assistance assistant for healthcare,
+              education, finance, public services, schemes, rewards, nearby help,
+              and live voice conversations.
+            </div>
           </div>
 
-          <div style={{ ...styles.statusBar, ...statusStyle[backendStatus] }}>
-            <span
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: "50%",
-                background:
-                  backendStatus === "online"
-                    ? "#16a34a"
-                    : backendStatus === "offline"
-                    ? "#dc2626"
-                    : "#ca8a04",
-                display: "inline-block",
-              }}
-            />
-            {statusLabel[backendStatus]}
+          <div style={styles.statusRow}>
+            <div style={{ ...styles.statusBar, ...statusStyle[backendStatus] }}>
+              <span
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  background:
+                    backendStatus === "online"
+                      ? "#16a34a"
+                      : backendStatus === "offline"
+                      ? "#dc2626"
+                      : "#ca8a04",
+                  display: "inline-block",
+                }}
+              />
+              {statusLabel[backendStatus]}
+            </div>
+
+            <div style={{ ...styles.statusBar, ...styles.statusWaking }}>
+              <span
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: "50%",
+                  background: voiceActive ? "#2563eb" : "#ca8a04",
+                  display: "inline-block",
+                }}
+              />
+              {voiceBadge}
+            </div>
           </div>
 
-          <div style={{ ...styles.statusBar, ...styles.statusWaking }}>
-            <span
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: "50%",
-                background: voiceActive ? "#2563eb" : "#ca8a04",
-                display: "inline-block",
-              }}
-            />
-            {voiceBadge}
-          </div>
-
-          <div style={styles.sectionTitle}>Capabilities</div>
           <div>
-            {[
-              "Government schemes",
-              "Eligibility guidance",
-              "Nearby places",
-              "Rewards and badges",
-              "Text + voice support",
-              "Multilingual assistance",
-            ].map((item) => (
-              <span key={item} style={styles.pill}>
-                {item}
-              </span>
-            ))}
-          </div>
-
-          <div style={styles.sectionTitle}>Quick prompts</div>
-
-          <button
-            style={styles.quickButton}
-            onClick={() => sendMessage("I need hospital help near Bangalore")}
-          >
-            Healthcare Help
-          </button>
-
-          <button
-            style={styles.quickButton}
-            onClick={() =>
-              sendMessage("I am a low income student and need scholarship help")
-            }
-          >
-            Education Scheme
-          </button>
-
-          <button
-            style={styles.quickButton}
-            onClick={() => sendMessage("How can I open a bank account?")}
-          >
-            Finance Support
-          </button>
-
-          <button
-            style={styles.quickButton}
-            onClick={() => sendMessage("Where is the nearest ration office?")}
-          >
-            Public Services
-          </button>
-
-          <div style={styles.sectionTitle}>Voice controls</div>
-          <div style={styles.small}>
-            Voice input and voice output are now handled by Vapi instead of the
-            browser.
-          </div>
-
-          <div style={{ marginTop: 12 }}>
-            <button
-              style={styles.primaryVoiceButton}
-              onClick={startVapiVoice}
-              disabled={voiceActive || voiceStatus === "connecting"}
-            >
-              {voiceStatus === "connecting"
-                ? "Connecting..."
-                : "🎤 Start Voice"}
-            </button>
-
-            <button
-              style={styles.dangerButton}
-              onClick={stopVapiVoice}
-              disabled={!voiceActive && voiceStatus !== "connecting"}
-            >
-              🛑 Stop Voice
-            </button>
-          </div>
-
-          <div style={styles.transcriptBox}>
-            <div style={styles.transcriptLabel}>Voice status</div>
-            <div style={styles.transcriptText}>{lastVoiceNote}</div>
-          </div>
-
-          <div style={styles.transcriptBox}>
-            <div style={styles.transcriptLabel}>Live user transcript</div>
-            <div style={styles.transcriptText}>
-              {liveUserTranscript || "Waiting for voice input..."}
+            <div style={styles.sectionTitle}>Capabilities</div>
+            <div style={styles.capabilities}>
+              {[
+                "Government schemes",
+                "Eligibility guidance",
+                "Nearby places",
+                "Rewards and badges",
+                "Text + voice support",
+                "Multilingual assistance",
+              ].map((item) => (
+                <span key={item} style={styles.pill}>
+                  {item}
+                </span>
+              ))}
             </div>
           </div>
 
-          <div style={styles.transcriptBox}>
-            <div style={styles.transcriptLabel}>Live assistant transcript</div>
-            <div style={styles.transcriptText}>
-              {liveAssistantTranscript || "Assistant reply will appear here..."}
+          <div>
+            <div style={styles.sectionTitle}>Quick prompts</div>
+
+            <button
+              style={styles.quickButton}
+              onClick={() => sendMessage("I need hospital help near Bangalore")}
+            >
+              Healthcare Help
+            </button>
+
+            <button
+              style={styles.quickButton}
+              onClick={() =>
+                sendMessage("I am a low income student and need scholarship help")
+              }
+            >
+              Education Scheme
+            </button>
+
+            <button
+              style={styles.quickButton}
+              onClick={() => sendMessage("How can I open a bank account?")}
+            >
+              Finance Support
+            </button>
+
+            <button
+              style={styles.quickButton}
+              onClick={() => sendMessage("Where is the nearest ration office?")}
+            >
+              Public Services
+            </button>
+          </div>
+
+          <div>
+            <div style={styles.sectionTitle}>Voice controls</div>
+            <div style={styles.small}>
+              Voice input and voice output are handled by Vapi instead of the browser.
+            </div>
+
+            <div style={{ marginTop: 12, display: "flex", gap: "8px", flexWrap: "wrap" }}>
+              <button
+                style={styles.primaryVoiceButton}
+                onClick={startVapiVoice}
+                disabled={voiceActive || voiceStatus === "connecting"}
+              >
+                {voiceStatus === "connecting" ? "Connecting..." : "🎤 Start Voice"}
+              </button>
+
+              <button
+                style={styles.dangerButton}
+                onClick={stopVapiVoice}
+                disabled={!voiceActive && voiceStatus !== "connecting"}
+              >
+                🛑 Stop Voice
+              </button>
+            </div>
+
+            <div style={styles.transcriptBox}>
+              <div style={styles.transcriptLabel}>Voice status</div>
+              <div style={styles.transcriptText}>{lastVoiceNote}</div>
+            </div>
+
+            <div style={styles.transcriptBox}>
+              <div style={styles.transcriptLabel}>Live user transcript</div>
+              <div style={styles.transcriptText}>
+                {liveUserTranscript || "Waiting for voice input..."}
+              </div>
+            </div>
+
+            <div style={styles.transcriptBox}>
+              <div style={styles.transcriptLabel}>Live assistant transcript</div>
+              <div style={styles.transcriptText}>
+                {liveAssistantTranscript || "Assistant reply will appear here..."}
+              </div>
             </div>
           </div>
 
-          <div style={{ marginTop: 16 }}>
+          <div>
             <button style={styles.secondaryButton} onClick={clearChat}>
               Reset Chat
             </button>
           </div>
-        </div>
+        </aside>
 
-        <div style={styles.main}>
-          <div style={styles.header}>
-            <div style={styles.heroRow}>
-              <div style={styles.heroCard}>
-                <div style={{ ...styles.title, fontSize: 27, marginBottom: 6 }}>
-                  Citizen Support Workspace
-                </div>
-                <div style={styles.subtitle}>
-                  Ask Sahaya about schemes, eligibility, hospitals, banks,
-                  police, ration offices, and more. Use text chat or talk
-                  directly with the voice assistant.
-                </div>
+        <main style={styles.main}>
+          <div style={styles.topBar}>
+            <div style={styles.topTitle}>Citizen Support Workspace</div>
+            <div style={styles.topSubtitle}>
+              Ask Sahaya about schemes, eligibility, hospitals, banks, police, ration offices, and more.
+              Use text chat or talk directly with the voice assistant.
+            </div>
+
+            <div style={styles.voiceCard}>
+              <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 6 }}>
+                Voice mode
               </div>
-
-              <div style={styles.voicePanel}>
-                <div style={{ fontSize: 14, fontWeight: 800, marginBottom: 6 }}>
-                  Voice mode
-                </div>
-                <div style={styles.subtitle}>
-                  Start a live call for multilingual speech input and spoken
-                  responses. Text chat remains available below.
-                </div>
-                <div style={styles.statText}>
-                  Assistant connected through environment variables.
-                </div>
+              <div style={styles.topSubtitle}>
+                Start a live call for multilingual speech input and spoken responses.
+                Text chat remains available below.
               </div>
             </div>
           </div>
@@ -764,7 +773,7 @@ export default function App() {
                     {message.content}
 
                     {message.role === "assistant" && mapLinks.length > 0 && (
-                      <div style={{ marginTop: 12 }}>
+                      <div style={{ marginTop: 12, display: "flex", gap: "8px", flexWrap: "wrap" }}>
                         {mapLinks.map((link, idx) => (
                           <a
                             key={idx}
@@ -805,10 +814,10 @@ export default function App() {
                     sendMessage();
                   }
                 }}
-                placeholder="Type your question to Sahaya AI..."
+                placeholder="Message Sahaya AI..."
               />
               <button
-                style={styles.button}
+                style={styles.sendButton}
                 onClick={() => sendMessage()}
                 disabled={loading || !input.trim()}
               >
@@ -834,7 +843,7 @@ export default function App() {
               </button>
             </div>
           </div>
-        </div>
+        </main>
       </div>
     </div>
   );
