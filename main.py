@@ -433,17 +433,18 @@ Instructions:
 - If a scheme is matched, mention it clearly.
 - Keep answers simple and direct.
 - Do not ask confirmation if user already provided information.
+- Keep the response concise and under 250 words unless the user asks for more detail.
 
 Explain clearly so common citizens can understand easily.
 Provide step-by-step guidance when relevant.
 """
 
-        print("Step 7: calling OpenRouter")
-        response = get_openrouter_client().chat.completions.create(
-    model="mistralai/mistral-small-3.1-24b-instruct",
+       response = get_openrouter_client().chat.completions.create(
+    model="openrouter/free",
     messages=[
         {"role": "user", "content": prompt}
     ],
+    max_tokens=500,
     timeout=25
 )
         print("Step 7 complete: OpenRouter response received")
