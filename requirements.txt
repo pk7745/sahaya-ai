@@ -3,7 +3,5 @@ uvicorn
 pydantic
 deep-translator
 requests
-sentence-transformers
 qdrant-client
 openai
-torch
