@@ -440,7 +440,7 @@ Provide step-by-step guidance when relevant.
 
         print("Step 7: calling OpenRouter")
         response = get_openrouter_client().chat.completions.create(
-    model="mistralai/mistral-7b-instruct:nitro",
+    model="mistralai/mistral-small-3.1-24b-instruct"
     messages=[
         {"role": "user", "content": prompt}
     ],
