@@ -439,14 +439,15 @@ Explain clearly so common citizens can understand easily.
 Provide step-by-step guidance when relevant.
 """
 
-response = get_openrouter_client().chat.completions.create(
-    model="openrouter/free",
-    messages=[
-        {"role": "user", "content": prompt}
-    ],
-    max_tokens=500,
-    timeout=25
-)
+        print("Step 7: calling OpenRouter")
+        response = get_openrouter_client().chat.completions.create(
+            model="openrouter/free",
+            messages=[
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=500,
+            timeout=25
+        )
         print("Step 7 complete: OpenRouter response received")
 
         answer = response.choices[0].message.content if response.choices else ""
