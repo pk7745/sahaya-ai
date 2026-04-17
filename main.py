@@ -440,12 +440,12 @@ Provide step-by-step guidance when relevant.
 
         print("Step 7: calling OpenRouter")
         response = get_openrouter_client().chat.completions.create(
-            model="mistralai/mistral-7b-instruct",
-            messages=[
-                {"role": "user", "content": prompt}
-            ],
-            timeout=25
-        )
+    model="mistralai/mistral-7b-instruct:nitro",
+    messages=[
+        {"role": "user", "content": prompt}
+    ],
+    timeout=25
+)
         print("Step 7 complete: OpenRouter response received")
 
         answer = response.choices[0].message.content if response.choices else ""
