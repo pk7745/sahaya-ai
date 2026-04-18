@@ -104,24 +104,26 @@ const styles = {
     marginTop: "8px",
   },
   readButton: {
-    padding: "10px 16px",
+    padding: "11px 18px",
     borderRadius: "12px",
     border: "none",
     background: "#2563eb",
     color: "#ffffff",
     cursor: "pointer",
     fontSize: "14px",
-    fontWeight: "700",
+    fontWeight: "800",
+    boxShadow: "0 4px 12px rgba(37, 99, 235, 0.25)",
   },
   stopButton: {
-    padding: "10px 16px",
+    padding: "11px 18px",
     borderRadius: "12px",
     border: "none",
     background: "#dc2626",
     color: "#ffffff",
     cursor: "pointer",
     fontSize: "14px",
-    fontWeight: "700",
+    fontWeight: "800",
+    boxShadow: "0 4px 12px rgba(220, 38, 38, 0.25)",
   },
   main: {
     display: "flex",
@@ -267,10 +269,10 @@ function cleanTextForSpeech(text) {
 
 function detectSpeechLang(text, fallback = "en-IN") {
   if (!text) return fallback;
-  if (/[\u0C80-\u0CFF]/.test(text)) return "kn-IN"; // Kannada
-  if (/[\u0900-\u097F]/.test(text)) return "hi-IN"; // Hindi / Devanagari
-  if (/[\u0B80-\u0BFF]/.test(text)) return "ta-IN"; // Tamil
-  if (/[\u0C00-\u0C7F]/.test(text)) return "te-IN"; // Telugu
+  if (/[\u0C80-\u0CFF]/.test(text)) return "kn-IN";
+  if (/[\u0900-\u097F]/.test(text)) return "hi-IN";
+  if (/[\u0B80-\u0BFF]/.test(text)) return "ta-IN";
+  if (/[\u0C00-\u0C7F]/.test(text)) return "te-IN";
   return fallback || "en-IN";
 }
 
