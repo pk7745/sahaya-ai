@@ -9,11 +9,24 @@ const styles = {
     fontFamily:
       'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
     color: "#111827",
+    width: "100%",
+    overflowX: "hidden",
   },
-  shell: {
+  shellDesktop: {
     display: "grid",
-    gridTemplateColumns: "290px 1fr",
+    gridTemplateColumns: "290px minmax(0, 1fr)",
     minHeight: "100vh",
+    width: "100%",
+    maxWidth: "100vw",
+    overflowX: "hidden",
+  },
+  shellMobile: {
+    display: "flex",
+    flexDirection: "column",
+    minHeight: "100vh",
+    width: "100%",
+    maxWidth: "100vw",
+    overflowX: "hidden",
   },
   sidebar: {
     background: "#ffffff",
@@ -22,6 +35,16 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     gap: "18px",
+    minWidth: 0,
+  },
+  sidebarMobile: {
+    background: "#ffffff",
+    borderBottom: "1px solid #e5e7eb",
+    padding: "16px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "16px",
+    minWidth: 0,
   },
   brand: {
     paddingBottom: "12px",
@@ -90,6 +113,7 @@ const styles = {
     fontSize: "14px",
     background: "#fff",
     outline: "none",
+    boxSizing: "border-box",
   },
   secondaryButton: {
     padding: "10px 14px",
@@ -130,9 +154,16 @@ const styles = {
     flexDirection: "column",
     minHeight: "100vh",
     background: "#ffffff",
+    minWidth: 0,
+    width: "100%",
   },
   topBar: {
     padding: "18px 24px",
+    borderBottom: "1px solid #e5e7eb",
+    background: "#ffffff",
+  },
+  topBarMobile: {
+    padding: "16px",
     borderBottom: "1px solid #e5e7eb",
     background: "#ffffff",
   },
@@ -185,6 +216,17 @@ const styles = {
     flexDirection: "column",
     gap: "18px",
     background: "#ffffff",
+    minWidth: 0,
+  },
+  chatMobile: {
+    flex: 1,
+    padding: "16px",
+    overflowY: "auto",
+    display: "flex",
+    flexDirection: "column",
+    gap: "16px",
+    background: "#ffffff",
+    minWidth: 0,
   },
   bubbleWrapUser: {
     display: "flex",
@@ -203,6 +245,18 @@ const styles = {
     whiteSpace: "pre-wrap",
     lineHeight: 1.75,
     fontSize: "15px",
+    wordBreak: "break-word",
+  },
+  bubbleUserMobile: {
+    maxWidth: "92%",
+    background: "#111827",
+    color: "#fff",
+    padding: "14px 16px",
+    borderRadius: "18px 18px 6px 18px",
+    whiteSpace: "pre-wrap",
+    lineHeight: 1.7,
+    fontSize: "14px",
+    wordBreak: "break-word",
   },
   bubbleBot: {
     maxWidth: "78%",
@@ -214,6 +268,19 @@ const styles = {
     whiteSpace: "pre-wrap",
     lineHeight: 1.75,
     fontSize: "15px",
+    wordBreak: "break-word",
+  },
+  bubbleBotMobile: {
+    maxWidth: "92%",
+    background: "#f9fafb",
+    color: "#111827",
+    padding: "14px 16px",
+    borderRadius: "18px 18px 18px 6px",
+    border: "1px solid #e5e7eb",
+    whiteSpace: "pre-wrap",
+    lineHeight: 1.7,
+    fontSize: "14px",
+    wordBreak: "break-word",
   },
   answerActions: {
     marginTop: "14px",
@@ -227,9 +294,20 @@ const styles = {
     borderTop: "1px solid #e5e7eb",
     background: "#ffffff",
   },
+  controlsMobile: {
+    padding: "16px",
+    borderTop: "1px solid #e5e7eb",
+    background: "#ffffff",
+  },
   inputRow: {
     display: "flex",
     gap: "12px",
+    marginBottom: "12px",
+  },
+  inputRowMobile: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px",
     marginBottom: "12px",
   },
   input: {
@@ -240,6 +318,8 @@ const styles = {
     fontSize: "15px",
     outline: "none",
     background: "#fff",
+    minWidth: 0,
+    boxSizing: "border-box",
   },
   button: {
     padding: "14px 20px",
@@ -305,6 +385,7 @@ export default function App() {
   const [speechVoices, setSpeechVoices] = useState([]);
   const [backendStatus, setBackendStatus] = useState("checking");
   const [speechStatus, setSpeechStatus] = useState("Ready to read replies");
+  const [isMobile, setIsMobile] = useState(false);
   const bottomRef = useRef(null);
   const recognitionRef = useRef(null);
 
@@ -324,6 +405,16 @@ export default function App() {
     waking: "Waking up server...",
     checking: "Checking backend...",
   };
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 900);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -532,8 +623,8 @@ export default function App() {
 
   return (
     <div style={styles.app}>
-      <div style={styles.shell}>
-        <aside style={styles.sidebar}>
+      <div style={isMobile ? styles.shellMobile : styles.shellDesktop}>
+        <aside style={isMobile ? styles.sidebarMobile : styles.sidebar}>
           <div style={styles.brand}>
             <div style={styles.title}>Sahaya AI</div>
             <div style={styles.subtitle}>
@@ -588,7 +679,9 @@ export default function App() {
                 "Nearby places",
                 "Rewards and badges",
                 "Voice input",
-                "Read aloud",
+                "Read answer",
+                "Stop reading",
+                "Read draft",
               ].map((item) => (
                 <span key={item} style={styles.pill}>
                   {item}
@@ -658,7 +751,7 @@ export default function App() {
               </select>
             </div>
 
-            <div style={{ marginTop: 12 }}>
+            <div style={{ marginTop: 12, display: "flex", flexWrap: "wrap" }}>
               <button style={styles.secondaryButton} onClick={toggleVoiceInput}>
                 {listening ? "🛑 Stop Mic" : "🎤 Voice Input"}
               </button>
@@ -677,7 +770,7 @@ export default function App() {
         </aside>
 
         <main style={styles.main}>
-          <div style={styles.topBar}>
+          <div style={isMobile ? styles.topBarMobile : styles.topBar}>
             <div style={styles.topTitle}>Citizen Support Workspace</div>
             <div style={styles.topSubtitle}>
               Ask Sahaya about schemes, eligibility, hospitals, banks, police,
@@ -685,7 +778,7 @@ export default function App() {
             </div>
           </div>
 
-          <div style={styles.chat}>
+          <div style={isMobile ? styles.chatMobile : styles.chat}>
             {messages.map((message, index) => {
               const mapLinks =
                 message.role === "assistant"
@@ -704,7 +797,11 @@ export default function App() {
                   <div
                     style={
                       message.role === "user"
-                        ? styles.bubbleUser
+                        ? isMobile
+                          ? styles.bubbleUserMobile
+                          : styles.bubbleUser
+                        : isMobile
+                        ? styles.bubbleBotMobile
                         : styles.bubbleBot
                     }
                   >
@@ -716,14 +813,14 @@ export default function App() {
                           style={styles.readButton}
                           onClick={() => speak(message.content)}
                         >
-                          🔊 Read
+                          🔊 Read Answer
                         </button>
 
                         <button
                           style={styles.stopButton}
                           onClick={stopSpeaking}
                         >
-                          ⏹ Stop
+                          ⏹ Stop Reading
                         </button>
 
                         {mapLinks.map((link, idx) => (
@@ -748,15 +845,17 @@ export default function App() {
 
             {loading && (
               <div style={styles.bubbleWrapBot}>
-                <div style={styles.bubbleBot}>Sahaya is thinking...</div>
+                <div style={isMobile ? styles.bubbleBotMobile : styles.bubbleBot}>
+                  Sahaya is thinking...
+                </div>
               </div>
             )}
 
             <div ref={bottomRef} />
           </div>
 
-          <div style={styles.controls}>
-            <div style={styles.inputRow}>
+          <div style={isMobile ? styles.controlsMobile : styles.controls}>
+            <div style={isMobile ? styles.inputRowMobile : styles.inputRow}>
               <input
                 style={styles.input}
                 value={input}
@@ -783,6 +882,13 @@ export default function App() {
                 onClick={() => input && speak(input)}
               >
                 🔊 Read Draft
+              </button>
+
+              <button
+                style={styles.secondaryButton}
+                onClick={stopSpeaking}
+              >
+                ⏹ Stop Draft/Answer Reading
               </button>
 
               <button
