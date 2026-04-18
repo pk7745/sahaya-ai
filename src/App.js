@@ -4,16 +4,14 @@ import Vapi from "@vapi-ai/web";
 const API_BASE =
   import.meta.env.VITE_API_BASE || "https://sahaya-ai-3ss2.onrender.com";
 
-const VAPI_PUBLIC_KEY =
-  import.meta.env.VITE_VAPI_PUBLIC_KEY || "";
-
-const VAPI_ASSISTANT_ID =
-  import.meta.env.VITE_VAPI_ASSISTANT_ID || "";
+const VAPI_PUBLIC_KEY = import.meta.env.VITE_VAPI_PUBLIC_KEY || "";
+const VAPI_ASSISTANT_ID = import.meta.env.VITE_VAPI_ASSISTANT_ID || "";
 
 const styles = {
   app: {
     minHeight: "100vh",
-    background: "#f7f7f8",
+    background:
+      "linear-gradient(180deg, #f8fafc 0%, #f3f4f6 45%, #eef2ff 100%)",
     fontFamily:
       'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
     color: "#111827",
@@ -22,7 +20,7 @@ const styles = {
   },
   shellDesktop: {
     display: "grid",
-    gridTemplateColumns: "300px minmax(0, 1fr)",
+    gridTemplateColumns: "320px minmax(0, 1fr)",
     minHeight: "100vh",
     width: "100%",
     maxWidth: "100vw",
@@ -37,17 +35,20 @@ const styles = {
     overflowX: "hidden",
   },
   sidebar: {
-    background: "#ffffff",
-    borderRight: "1px solid #e5e7eb",
-    padding: "18px",
+    background: "rgba(255,255,255,0.9)",
+    backdropFilter: "blur(14px)",
+    borderRight: "1px solid rgba(226,232,240,0.9)",
+    padding: "20px",
     display: "flex",
     flexDirection: "column",
     gap: "18px",
     minWidth: 0,
+    boxShadow: "10px 0 30px rgba(15,23,42,0.04)",
   },
   sidebarMobile: {
-    background: "#ffffff",
-    borderBottom: "1px solid #e5e7eb",
+    background: "rgba(255,255,255,0.92)",
+    backdropFilter: "blur(14px)",
+    borderBottom: "1px solid rgba(226,232,240,0.9)",
     padding: "16px",
     display: "flex",
     flexDirection: "column",
@@ -55,25 +56,28 @@ const styles = {
     minWidth: 0,
   },
   brand: {
-    paddingBottom: "12px",
-    borderBottom: "1px solid #eef2f7",
+    paddingBottom: "14px",
+    borderBottom: "1px solid #e2e8f0",
   },
   title: {
-    fontSize: "30px",
-    fontWeight: "800",
+    fontSize: "31px",
+    fontWeight: "900",
     marginBottom: "8px",
-    letterSpacing: "-0.03em",
+    letterSpacing: "-0.04em",
+    color: "#0f172a",
   },
   subtitle: {
-    fontSize: "14px",
-    color: "#6b7280",
-    lineHeight: 1.6,
+    fontSize: "13.5px",
+    color: "#64748b",
+    lineHeight: 1.65,
   },
   sectionTitle: {
-    fontSize: "14px",
-    fontWeight: "800",
+    fontSize: "13px",
+    fontWeight: "900",
     marginBottom: "10px",
-    color: "#111827",
+    color: "#0f172a",
+    textTransform: "uppercase",
+    letterSpacing: "0.06em",
   },
   pillWrap: {
     display: "flex",
@@ -81,145 +85,155 @@ const styles = {
     gap: "8px",
   },
   pill: {
-    background: "#f9fafb",
-    border: "1px solid #d1d5db",
-    color: "#374151",
-    padding: "7px 10px",
+    background: "#ffffff",
+    border: "1px solid #dbeafe",
+    color: "#334155",
+    padding: "7px 11px",
     borderRadius: "999px",
     fontSize: "12px",
-    fontWeight: "600",
+    fontWeight: "700",
+    boxShadow: "0 2px 10px rgba(37,99,235,0.05)",
   },
   card: {
-    background: "#f9fafb",
+    background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
     border: "1px solid #e5e7eb",
-    borderRadius: "16px",
+    borderRadius: "18px",
     padding: "14px",
+    boxShadow: "0 8px 24px rgba(15,23,42,0.05)",
+  },
+  transcriptCard: {
+    background: "#ffffff",
+    border: "1px solid #e5e7eb",
+    borderRadius: "14px",
+    padding: "12px 13px",
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.4)",
+    fontSize: "13px",
+    color: "#111827",
+    lineHeight: 1.6,
+    minHeight: "52px",
+    whiteSpace: "pre-wrap",
+    wordBreak: "break-word",
   },
   quickButton: {
     width: "100%",
     textAlign: "left",
     padding: "13px 14px",
-    borderRadius: "14px",
+    borderRadius: "16px",
     border: "1px solid #e5e7eb",
-    background: "#ffffff",
+    background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
     cursor: "pointer",
     marginBottom: "10px",
     fontSize: "14px",
     fontWeight: "700",
-    color: "#111827",
+    color: "#0f172a",
+    boxShadow: "0 4px 14px rgba(15,23,42,0.04)",
   },
   small: {
     fontSize: "13px",
-    color: "#6b7280",
+    color: "#64748b",
     lineHeight: 1.6,
   },
   select: {
     width: "100%",
     padding: "12px 14px",
-    borderRadius: "12px",
+    borderRadius: "14px",
     border: "1px solid #d1d5db",
     fontSize: "14px",
     background: "#fff",
     outline: "none",
     boxSizing: "border-box",
+    boxShadow: "0 2px 8px rgba(15,23,42,0.03)",
   },
   secondaryButton: {
     padding: "10px 14px",
-    borderRadius: "12px",
+    borderRadius: "14px",
     border: "1px solid #d1d5db",
-    background: "#fff",
+    background: "#ffffff",
     color: "#111827",
     cursor: "pointer",
     fontSize: "14px",
-    fontWeight: "600",
-    marginRight: "8px",
-    marginTop: "8px",
-  },
-  primaryButton: {
-    padding: "10px 14px",
-    borderRadius: "12px",
-    border: "none",
-    background: "#111827",
-    color: "#fff",
-    cursor: "pointer",
-    fontSize: "14px",
     fontWeight: "700",
     marginRight: "8px",
     marginTop: "8px",
+    boxShadow: "0 3px 12px rgba(15,23,42,0.04)",
   },
   successButton: {
     padding: "10px 14px",
-    borderRadius: "12px",
+    borderRadius: "14px",
     border: "none",
-    background: "#16a34a",
+    background: "linear-gradient(180deg, #22c55e 0%, #16a34a 100%)",
     color: "#fff",
     cursor: "pointer",
     fontSize: "14px",
-    fontWeight: "700",
+    fontWeight: "800",
     marginRight: "8px",
     marginTop: "8px",
+    boxShadow: "0 8px 18px rgba(34,197,94,0.22)",
   },
   dangerSoftButton: {
     padding: "10px 14px",
-    borderRadius: "12px",
+    borderRadius: "14px",
     border: "1px solid #fecaca",
-    background: "#fff1f2",
+    background: "linear-gradient(180deg, #fff1f2 0%, #ffe4e6 100%)",
     color: "#991b1b",
     cursor: "pointer",
     fontSize: "14px",
-    fontWeight: "700",
+    fontWeight: "800",
     marginRight: "8px",
     marginTop: "8px",
   },
   readButton: {
     padding: "11px 18px",
-    borderRadius: "12px",
+    borderRadius: "14px",
     border: "none",
-    background: "#2563eb",
+    background: "linear-gradient(180deg, #3b82f6 0%, #2563eb 100%)",
     color: "#ffffff",
     cursor: "pointer",
     fontSize: "14px",
     fontWeight: "800",
-    boxShadow: "0 4px 12px rgba(37, 99, 235, 0.25)",
+    boxShadow: "0 8px 18px rgba(37,99,235,0.25)",
   },
   stopButton: {
     padding: "11px 18px",
-    borderRadius: "12px",
+    borderRadius: "14px",
     border: "none",
-    background: "#dc2626",
+    background: "linear-gradient(180deg, #ef4444 0%, #dc2626 100%)",
     color: "#ffffff",
     cursor: "pointer",
     fontSize: "14px",
     fontWeight: "800",
-    boxShadow: "0 4px 12px rgba(220, 38, 38, 0.25)",
+    boxShadow: "0 8px 18px rgba(220,38,38,0.22)",
   },
   main: {
     display: "flex",
     flexDirection: "column",
     minHeight: "100vh",
-    background: "#ffffff",
+    background: "transparent",
     minWidth: 0,
     width: "100%",
   },
   topBar: {
-    padding: "18px 24px",
-    borderBottom: "1px solid #e5e7eb",
-    background: "#ffffff",
+    padding: "20px 26px",
+    borderBottom: "1px solid rgba(226,232,240,0.9)",
+    background: "rgba(255,255,255,0.7)",
+    backdropFilter: "blur(14px)",
   },
   topBarMobile: {
     padding: "16px",
-    borderBottom: "1px solid #e5e7eb",
-    background: "#ffffff",
+    borderBottom: "1px solid rgba(226,232,240,0.9)",
+    background: "rgba(255,255,255,0.76)",
+    backdropFilter: "blur(14px)",
   },
   topTitle: {
-    fontSize: "28px",
-    fontWeight: "800",
+    fontSize: "30px",
+    fontWeight: "900",
     marginBottom: "6px",
-    letterSpacing: "-0.03em",
+    letterSpacing: "-0.04em",
+    color: "#0f172a",
   },
   topSubtitle: {
     fontSize: "14px",
-    color: "#6b7280",
+    color: "#64748b",
     lineHeight: 1.6,
   },
   statusRow: {
@@ -235,7 +249,7 @@ const styles = {
     display: "inline-flex",
     alignItems: "center",
     gap: "7px",
-    fontWeight: "700",
+    fontWeight: "800",
   },
   statusOnline: {
     background: "#dcfce7",
@@ -259,12 +273,13 @@ const styles = {
   },
   chat: {
     flex: 1,
-    padding: "24px",
+    padding: "28px",
     overflowY: "auto",
     display: "flex",
     flexDirection: "column",
     gap: "18px",
-    background: "#ffffff",
+    background:
+      "radial-gradient(circle at top, rgba(59,130,246,0.04), transparent 28%)",
     minWidth: 0,
   },
   chatMobile: {
@@ -274,7 +289,8 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     gap: "16px",
-    background: "#ffffff",
+    background:
+      "radial-gradient(circle at top, rgba(59,130,246,0.04), transparent 28%)",
     minWidth: 0,
   },
   bubbleWrapUser: {
@@ -287,49 +303,53 @@ const styles = {
   },
   bubbleUser: {
     maxWidth: "78%",
-    background: "#111827",
+    background: "linear-gradient(180deg, #0f172a 0%, #111827 100%)",
     color: "#fff",
     padding: "16px 18px",
-    borderRadius: "18px 18px 6px 18px",
+    borderRadius: "22px 22px 8px 22px",
     whiteSpace: "pre-wrap",
     lineHeight: 1.75,
     fontSize: "15px",
     wordBreak: "break-word",
+    boxShadow: "0 12px 28px rgba(15,23,42,0.16)",
   },
   bubbleUserMobile: {
     maxWidth: "92%",
-    background: "#111827",
+    background: "linear-gradient(180deg, #0f172a 0%, #111827 100%)",
     color: "#fff",
     padding: "14px 16px",
-    borderRadius: "18px 18px 6px 18px",
+    borderRadius: "20px 20px 8px 20px",
     whiteSpace: "pre-wrap",
     lineHeight: 1.7,
     fontSize: "14px",
     wordBreak: "break-word",
+    boxShadow: "0 10px 24px rgba(15,23,42,0.14)",
   },
   bubbleBot: {
     maxWidth: "78%",
-    background: "#f9fafb",
+    background: "rgba(255,255,255,0.92)",
     color: "#111827",
     padding: "16px 18px",
-    borderRadius: "18px 18px 18px 6px",
+    borderRadius: "22px 22px 22px 8px",
     border: "1px solid #e5e7eb",
     whiteSpace: "pre-wrap",
     lineHeight: 1.75,
     fontSize: "15px",
     wordBreak: "break-word",
+    boxShadow: "0 10px 28px rgba(15,23,42,0.06)",
   },
   bubbleBotMobile: {
     maxWidth: "92%",
-    background: "#f9fafb",
+    background: "rgba(255,255,255,0.95)",
     color: "#111827",
     padding: "14px 16px",
-    borderRadius: "18px 18px 18px 6px",
+    borderRadius: "20px 20px 20px 8px",
     border: "1px solid #e5e7eb",
     whiteSpace: "pre-wrap",
     lineHeight: 1.7,
     fontSize: "14px",
     wordBreak: "break-word",
+    boxShadow: "0 8px 20px rgba(15,23,42,0.06)",
   },
   answerActions: {
     marginTop: "14px",
@@ -340,13 +360,15 @@ const styles = {
   },
   controls: {
     padding: "18px 24px 24px",
-    borderTop: "1px solid #e5e7eb",
-    background: "#ffffff",
+    borderTop: "1px solid rgba(226,232,240,0.9)",
+    background: "rgba(255,255,255,0.82)",
+    backdropFilter: "blur(14px)",
   },
   controlsMobile: {
     padding: "16px",
-    borderTop: "1px solid #e5e7eb",
-    background: "#ffffff",
+    borderTop: "1px solid rgba(226,232,240,0.9)",
+    background: "rgba(255,255,255,0.84)",
+    backdropFilter: "blur(14px)",
   },
   inputRow: {
     display: "flex",
@@ -362,23 +384,25 @@ const styles = {
   input: {
     flex: 1,
     padding: "16px 18px",
-    borderRadius: "16px",
+    borderRadius: "18px",
     border: "1px solid #d1d5db",
     fontSize: "15px",
     outline: "none",
     background: "#fff",
     minWidth: 0,
     boxSizing: "border-box",
+    boxShadow: "0 8px 22px rgba(15,23,42,0.05)",
   },
   button: {
     padding: "14px 20px",
-    borderRadius: "16px",
+    borderRadius: "18px",
     border: "none",
-    background: "#111827",
+    background: "linear-gradient(180deg, #111827 0%, #0f172a 100%)",
     color: "#fff",
     cursor: "pointer",
     fontSize: "14px",
-    fontWeight: "700",
+    fontWeight: "800",
+    boxShadow: "0 10px 22px rgba(15,23,42,0.16)",
   },
   footerRow: {
     display: "flex",
@@ -443,7 +467,9 @@ export default function App() {
 
   const bottomRef = useRef(null);
   const vapiRef = useRef(null);
-  const addedTranscriptKeysRef = useRef(new Set());
+
+  const lastFinalUserRef = useRef("");
+  const lastFinalAssistantRef = useRef("");
 
   const statusStyle = useMemo(
     () => ({
@@ -503,7 +529,7 @@ export default function App() {
         setBackendStatus("waking");
         const response = await fetchWithTimeout(`${API_BASE}/`, {}, 15000);
         setBackendStatus(response.ok ? "online" : "offline");
-      } catch (error) {
+      } catch {
         setBackendStatus("offline");
       }
     };
@@ -513,30 +539,36 @@ export default function App() {
 
   useEffect(() => {
     if (!VAPI_PUBLIC_KEY || !VAPI_ASSISTANT_ID) {
-      setLastVoiceEvent("Vapi credentials are missing.");
+      setLastVoiceEvent("Voice setup is incomplete. Add Vapi environment values.");
       return;
     }
 
-    try {
-      const vapi = new Vapi(VAPI_PUBLIC_KEY);
-      vapiRef.current = vapi;
-      setLastVoiceEvent("Vapi initialized successfully.");
+    let vapi;
 
-      const pushUniqueMessage = (role, content, keyHint) => {
+    try {
+      vapi = new Vapi(VAPI_PUBLIC_KEY);
+      vapiRef.current = vapi;
+      setLastVoiceEvent("Voice assistant is ready.");
+
+      const appendUniqueChatMessage = (role, content) => {
         const text = (content || "").trim();
         if (!text) return;
 
-        const key = `${role}:${keyHint || text}`;
-        if (addedTranscriptKeysRef.current.has(key)) return;
-        addedTranscriptKeysRef.current.add(key);
-
-        setMessages((prev) => [...prev, { role, content: text }]);
+        setMessages((prev) => {
+          const last = prev[prev.length - 1];
+          if (last && last.role === role && last.content.trim() === text) {
+            return prev;
+          }
+          return [...prev, { role, content: text }];
+        });
       };
 
       vapi.on("call-start", () => {
         setVoiceConnected(true);
         setVoiceConnecting(false);
         setLastVoiceEvent("Voice call started.");
+        setLiveUserTranscript("Listening...");
+        setLiveAssistantTranscript("Assistant reply will appear here...");
       });
 
       vapi.on("call-end", () => {
@@ -554,54 +586,76 @@ export default function App() {
       });
 
       vapi.on("message", (msg) => {
-        try {
-          if (!msg) return;
+        if (!msg) return;
 
-          if (msg.type === "transcript") {
-            const transcriptText = (msg.transcript || "").trim();
-            const transcriptRole = msg.role || "assistant";
-            const transcriptType = msg.transcriptType || "";
+        const type = msg.type || "";
 
-            if (transcriptRole === "user") {
-              setLiveUserTranscript(transcriptText || "Waiting for voice input...");
-              if (transcriptType === "final" && transcriptText) {
-                setInput(transcriptText);
-                pushUniqueMessage("user", transcriptText, msg.timestamp || msg.id || transcriptText);
-              }
+        if (type === "transcript") {
+          const role = msg.role || "assistant";
+          const transcriptText = (msg.transcript || "").trim();
+          const transcriptType = msg.transcriptType || "";
+
+          if (role === "user") {
+            if (transcriptText) {
+              setLiveUserTranscript(transcriptText);
             }
 
-            if (transcriptRole === "assistant") {
-              setLiveAssistantTranscript(
-                transcriptText || "Assistant reply will appear here..."
-              );
-              if (transcriptType === "final" && transcriptText) {
-                pushUniqueMessage(
-                  "assistant",
-                  transcriptText,
-                  msg.timestamp || msg.id || transcriptText
-                );
+            if (transcriptType === "final" && transcriptText) {
+              setInput(transcriptText);
+              if (lastFinalUserRef.current !== transcriptText) {
+                lastFinalUserRef.current = transcriptText;
+                appendUniqueChatMessage("user", transcriptText);
               }
             }
           }
 
-          if (msg.type === "conversation-update") {
-            const userText = msg.conversation?.transcript?.user;
-            const assistantText = msg.conversation?.transcript?.assistant;
-
-            if (userText) {
-              setLiveUserTranscript(userText);
+          if (role === "assistant") {
+            if (transcriptText) {
+              setLiveAssistantTranscript(transcriptText);
             }
-            if (assistantText) {
-              setLiveAssistantTranscript(assistantText);
+
+            if (transcriptType === "final" && transcriptText) {
+              if (lastFinalAssistantRef.current !== transcriptText) {
+                lastFinalAssistantRef.current = transcriptText;
+                appendUniqueChatMessage("assistant", transcriptText);
+              }
             }
           }
 
-          if (msg.type === "function-call" || msg.type === "tool-calls") {
-            setLastVoiceEvent("Assistant is using tools.");
+          return;
+        }
+
+        if (type === "conversation-update") {
+          const conversation = msg.conversation || {};
+          const maybeUser =
+            conversation?.transcript?.user ||
+            conversation?.userTranscript ||
+            "";
+          const maybeAssistant =
+            conversation?.transcript?.assistant ||
+            conversation?.assistantTranscript ||
+            "";
+
+          if (maybeUser) {
+            setLiveUserTranscript(maybeUser);
           }
-        } catch (err) {
-          console.error("Vapi message handling error:", err);
-          setLastVoiceEvent("Voice message handling issue occurred.");
+
+          if (maybeAssistant) {
+            setLiveAssistantTranscript(maybeAssistant);
+          }
+
+          return;
+        }
+
+        if (type === "function-call" || type === "tool-calls") {
+          setLastVoiceEvent("Assistant is using tools.");
+          return;
+        }
+
+        if (type === "status-update") {
+          if (msg.status) {
+            setLastVoiceEvent(String(msg.status));
+          }
         }
       });
 
@@ -609,20 +663,26 @@ export default function App() {
         console.error("Vapi error:", error);
         setVoiceConnected(false);
         setVoiceConnecting(false);
-        setLastVoiceEvent("Voice service had an issue. You can still continue using text chat.");
-      });
 
-      return () => {
-        try {
-          vapi.stop();
-        } catch (e) {
-          console.error("Vapi cleanup stop error:", e);
-        }
-      };
+        const safeMessage =
+          error?.message ||
+          error?.error?.message ||
+          "Voice temporarily paused. Please try Start Voice again.";
+
+        setLastVoiceEvent(safeMessage);
+      });
     } catch (error) {
       console.error("Vapi initialization failed:", error);
-      setLastVoiceEvent("Vapi initialization failed.");
+      setLastVoiceEvent("Voice initialization failed.");
     }
+
+    return () => {
+      try {
+        vapi?.stop();
+      } catch {
+        // ignore cleanup stop errors
+      }
+    };
   }, []);
 
   const getBestVoice = (langCode) => {
@@ -674,7 +734,7 @@ export default function App() {
       };
 
       window.speechSynthesis.speak(utterance);
-    } catch (error) {
+    } catch {
       setSpeechStatus("Could not read the response aloud.");
     }
   };
@@ -688,14 +748,17 @@ export default function App() {
 
   const startVoice = async () => {
     if (!vapiRef.current) {
-      setLastVoiceEvent("Vapi is not initialized.");
+      setLastVoiceEvent("Voice assistant is not ready yet.");
       return;
     }
 
     try {
       setVoiceConnecting(true);
       setLastVoiceEvent("Connecting voice assistant...");
-      addedTranscriptKeysRef.current.clear();
+      lastFinalUserRef.current = "";
+      lastFinalAssistantRef.current = "";
+      setLiveUserTranscript("Listening...");
+      setLiveAssistantTranscript("Assistant reply will appear here...");
       await vapiRef.current.start(VAPI_ASSISTANT_ID);
     } catch (error) {
       console.error("Failed to start Vapi:", error);
@@ -711,8 +774,7 @@ export default function App() {
       setVoiceConnected(false);
       setVoiceConnecting(false);
       setLastVoiceEvent("Voice assistant stopped.");
-    } catch (error) {
-      console.error("Failed to stop Vapi:", error);
+    } catch {
       setLastVoiceEvent("Could not stop voice assistant cleanly.");
     }
   };
@@ -747,11 +809,7 @@ export default function App() {
       const assistantText =
         data?.response || "I could not generate a response right now.";
 
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: assistantText },
-      ]);
-
+      setMessages((prev) => [...prev, { role: "assistant", content: assistantText }]);
       setBackendStatus("online");
 
       if (autoRead) {
@@ -765,13 +823,7 @@ export default function App() {
           ? "Server took too long to respond. Please try again."
           : "I could not connect to the backend. Please make sure the backend is live and the API URL is correct.";
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: errorMessage,
-        },
-      ]);
+      setMessages((prev) => [...prev, { role: "assistant", content: errorMessage }]);
     } finally {
       setLoading(false);
     }
@@ -790,7 +842,8 @@ export default function App() {
     setLiveUserTranscript("Waiting for voice input...");
     setLiveAssistantTranscript("Assistant reply will appear here...");
     setLastVoiceEvent("Chat reset complete.");
-    addedTranscriptKeysRef.current.clear();
+    lastFinalUserRef.current = "";
+    lastFinalAssistantRef.current = "";
   };
 
   return (
@@ -963,20 +1016,20 @@ export default function App() {
               </button>
             </div>
 
-            <div style={{ marginTop: 12 }} />
+            <div style={{ height: 12 }} />
 
             <div style={styles.sectionTitle}>Live user transcript</div>
-            <div style={styles.card}>{liveUserTranscript}</div>
+            <div style={styles.transcriptCard}>{liveUserTranscript}</div>
 
             <div style={{ height: 10 }} />
 
             <div style={styles.sectionTitle}>Live assistant transcript</div>
-            <div style={styles.card}>{liveAssistantTranscript}</div>
+            <div style={styles.transcriptCard}>{liveAssistantTranscript}</div>
 
             <div style={{ height: 10 }} />
 
             <div style={styles.sectionTitle}>Voice status</div>
-            <div style={styles.card}>{lastVoiceEvent}</div>
+            <div style={styles.transcriptCard}>{lastVoiceEvent}</div>
           </div>
 
           <div>
