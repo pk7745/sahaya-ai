@@ -384,6 +384,10 @@ def ask_question(query: Query):
             maps_result = get_nearby_places(original_query)
             print("Step 6 complete: nearby places processed")
 
+       # (only showing modified parts clearly, rest unchanged)
+
+# ---------------- PROMPT ----------------
+
         prompt = f"""
 You are Sahaya AI, a multilingual government help assistant for Indian citizens.
 
@@ -424,46 +428,52 @@ User rewards (IMPORTANT - include if available):
 {reward_info}
 
 Response rules:
-- Reply in the user's language when possible.
+- Reply in the same language as the user whenever possible.
 - Start with the most useful direct answer first.
+- Use very simple, citizen-friendly language that even low-literacy users can understand.
+- Keep sentences short and clear.
+- Keep the response concise and under 180 words.
+- Always complete the answer. Never stop mid-sentence.
 - If schemes are available, mention them clearly and naturally.
-- If location help is available, include it clearly.
+- If a scheme matches the user, explain in one simple line why it may help them.
+- If location help is relevant, include it clearly.
 - If real nearby places are available, mention them clearly.
 - If the user already provided enough details, do not ask repeated questions.
-- If important eligibility details are missing, ask only those missing details.
-- If a scheme is matched, say why it may fit the user.
-- Use short sections or bullet points only when they improve clarity.
-- Keep the response concise and under 1000 words unless the user asks for more detail.
-- Sound practical, warm, and trustworthy.
-- Avoid robotic phrasing.
-- Avoid saying you are just an AI model.
-- When useful, end with one smart next step the user should do now.
+- If important eligibility details are missing, ask only 1 or 2 missing questions at the end.
+- Prefer short bullet points or very small paragraphs when they improve clarity.
+- Give practical next steps the user can do immediately.
+- Sound warm, respectful, trustworthy, and like an official citizen helpdesk.
+- Avoid robotic wording, jargon, and complex terms.
+- Do not say you are an AI model.
+- Avoid long explanations unless the user asks for them.
+- End with one clear next step when useful.
 
-Explain clearly so common citizens can understand easily.
-Provide step-by-step guidance when relevant.
+Style guide:
+- Write like a helpful digital government officer with the warmth of a community volunteer.
+- Focus on clarity, usefulness, and action.
+- Explain clearly so common citizens can understand easily.
+- Provide step-by-step guidance when relevant.
 """
 
-        print("Step 7: calling OpenRouter")
+# ---------------- MODEL CALL ----------------
+
         response = get_openrouter_client().chat.completions.create(
             model="openrouter/auto",
             messages=[
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=900,
+            max_tokens=350,
+            temperature=0.5,
             timeout=25
         )
-        print("Step 7 complete: OpenRouter response received")
-        print("OpenRouter raw choices:", response.choices)
+
+# ---------------- RESPONSE FIX ----------------
 
         answer = response.choices[0].message.content if response.choices else ""
 
+        # 🔥 Prevent half answers
         if not answer or not answer.strip():
-            print("Step 8: empty answer from OpenRouter")
-            answer = "I’m here to help. Please rephrase your question once, and I’ll guide you clearly."
+            answer = "I’m here to help. Please ask your question again, and I will guide you clearly."
 
-        print("Step 8 complete: returning final response")
-        return {"response": answer}
-
-    except Exception as e:
-        print(f"ERROR in /ask: {e}")
-        return {"response": f"Backend error: {str(e)}"}
+        if answer.strip().endswith(("and", "or", "ಮತ್ತು", "और")):
+            answer += "\n\nPlease tell me your location or occupation so I can guide you better."
