@@ -269,13 +269,6 @@ def tokenize(text):
 
 
 def lightweight_qdrant_context(user_query, limit=2, scan_limit=30):
-    """
-    Lightweight fallback retrieval:
-    - No sentence-transformers
-    - No torch
-    - Pull a few payloads from Qdrant
-    - Rank by keyword overlap
-    """
     try:
         client = get_qdrant_client()
 
@@ -338,7 +331,8 @@ Solution: {solution}
 
 
 class Query(BaseModel):
-    query: str
+    query: str = ""
+    message: str = ""
 
 
 @app.get("/")
@@ -348,7 +342,8 @@ def root():
 
 @app.post("/ask-test")
 def ask_test(query: Query):
-    return {"response": f"Test working: {query.query}"}
+    text = (query.query or query.message).strip()
+    return {"response": f"Test working: {text}"}
 
 
 @app.post("/ask")
@@ -356,7 +351,7 @@ def ask_question(query: Query):
     try:
         print("Step 1: /ask request received")
 
-        original_query = query.query.strip()
+        original_query = (query.query or query.message).strip()
 
         if not original_query:
             print("Step 1.1: empty query")
@@ -450,7 +445,7 @@ Provide step-by-step guidance when relevant.
 
         print("Step 7: calling OpenRouter")
         response = get_openrouter_client().chat.completions.create(
-            model="meta-llama/llama-3.1-8b-instruct:free",
+            model="openrouter/auto",
             messages=[
                 {"role": "user", "content": prompt}
             ],
