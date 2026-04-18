@@ -1,6 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import Vapi from "@vapi-ai/web";
 
-const API_BASE = "https://sahaya-ai-3ss2.onrender.com";
+const API_BASE =
+  import.meta.env.VITE_API_BASE || "https://sahaya-ai-3ss2.onrender.com";
+
+const VAPI_PUBLIC_KEY =
+  import.meta.env.VITE_VAPI_PUBLIC_KEY || "";
+
+const VAPI_ASSISTANT_ID =
+  import.meta.env.VITE_VAPI_ASSISTANT_ID || "";
 
 const styles = {
   app: {
@@ -14,7 +22,7 @@ const styles = {
   },
   shellDesktop: {
     display: "grid",
-    gridTemplateColumns: "290px minmax(0, 1fr)",
+    gridTemplateColumns: "300px minmax(0, 1fr)",
     minHeight: "100vh",
     width: "100%",
     maxWidth: "100vw",
@@ -127,6 +135,42 @@ const styles = {
     marginRight: "8px",
     marginTop: "8px",
   },
+  primaryButton: {
+    padding: "10px 14px",
+    borderRadius: "12px",
+    border: "none",
+    background: "#111827",
+    color: "#fff",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "700",
+    marginRight: "8px",
+    marginTop: "8px",
+  },
+  successButton: {
+    padding: "10px 14px",
+    borderRadius: "12px",
+    border: "none",
+    background: "#16a34a",
+    color: "#fff",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "700",
+    marginRight: "8px",
+    marginTop: "8px",
+  },
+  dangerSoftButton: {
+    padding: "10px 14px",
+    borderRadius: "12px",
+    border: "1px solid #fecaca",
+    background: "#fff1f2",
+    color: "#991b1b",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "700",
+    marginRight: "8px",
+    marginTop: "8px",
+  },
   readButton: {
     padding: "11px 18px",
     borderRadius: "12px",
@@ -207,6 +251,11 @@ const styles = {
     background: "#fef3c7",
     color: "#92400e",
     border: "1px solid #fde68a",
+  },
+  statusNeutral: {
+    background: "#eff6ff",
+    color: "#1d4ed8",
+    border: "1px solid #bfdbfe",
   },
   chat: {
     flex: 1,
@@ -380,14 +429,21 @@ export default function App() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [autoRead, setAutoRead] = useState(false);
-  const [listening, setListening] = useState(false);
   const [voiceLang, setVoiceLang] = useState("en-IN");
   const [speechVoices, setSpeechVoices] = useState([]);
   const [backendStatus, setBackendStatus] = useState("checking");
   const [speechStatus, setSpeechStatus] = useState("Ready to read replies");
   const [isMobile, setIsMobile] = useState(false);
+
+  const [voiceConnected, setVoiceConnected] = useState(false);
+  const [voiceConnecting, setVoiceConnecting] = useState(false);
+  const [liveUserTranscript, setLiveUserTranscript] = useState("Waiting for voice input...");
+  const [liveAssistantTranscript, setLiveAssistantTranscript] = useState("Assistant reply will appear here...");
+  const [lastVoiceEvent, setLastVoiceEvent] = useState("Voice assistant is ready.");
+
   const bottomRef = useRef(null);
-  const recognitionRef = useRef(null);
+  const vapiRef = useRef(null);
+  const addedTranscriptKeysRef = useRef(new Set());
 
   const statusStyle = useMemo(
     () => ({
@@ -418,7 +474,7 @@ export default function App() {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading]);
+  }, [messages, loading, liveUserTranscript, liveAssistantTranscript]);
 
   useEffect(() => {
     const loadVoices = () => {
@@ -453,6 +509,120 @@ export default function App() {
     };
 
     checkBackend();
+  }, []);
+
+  useEffect(() => {
+    if (!VAPI_PUBLIC_KEY || !VAPI_ASSISTANT_ID) {
+      setLastVoiceEvent("Vapi credentials are missing.");
+      return;
+    }
+
+    try {
+      const vapi = new Vapi(VAPI_PUBLIC_KEY);
+      vapiRef.current = vapi;
+      setLastVoiceEvent("Vapi initialized successfully.");
+
+      const pushUniqueMessage = (role, content, keyHint) => {
+        const text = (content || "").trim();
+        if (!text) return;
+
+        const key = `${role}:${keyHint || text}`;
+        if (addedTranscriptKeysRef.current.has(key)) return;
+        addedTranscriptKeysRef.current.add(key);
+
+        setMessages((prev) => [...prev, { role, content: text }]);
+      };
+
+      vapi.on("call-start", () => {
+        setVoiceConnected(true);
+        setVoiceConnecting(false);
+        setLastVoiceEvent("Voice call started.");
+      });
+
+      vapi.on("call-end", () => {
+        setVoiceConnected(false);
+        setVoiceConnecting(false);
+        setLastVoiceEvent("Voice call ended.");
+      });
+
+      vapi.on("speech-start", () => {
+        setLastVoiceEvent("Assistant is speaking.");
+      });
+
+      vapi.on("speech-end", () => {
+        setLastVoiceEvent("Assistant finished speaking.");
+      });
+
+      vapi.on("message", (msg) => {
+        try {
+          if (!msg) return;
+
+          if (msg.type === "transcript") {
+            const transcriptText = (msg.transcript || "").trim();
+            const transcriptRole = msg.role || "assistant";
+            const transcriptType = msg.transcriptType || "";
+
+            if (transcriptRole === "user") {
+              setLiveUserTranscript(transcriptText || "Waiting for voice input...");
+              if (transcriptType === "final" && transcriptText) {
+                setInput(transcriptText);
+                pushUniqueMessage("user", transcriptText, msg.timestamp || msg.id || transcriptText);
+              }
+            }
+
+            if (transcriptRole === "assistant") {
+              setLiveAssistantTranscript(
+                transcriptText || "Assistant reply will appear here..."
+              );
+              if (transcriptType === "final" && transcriptText) {
+                pushUniqueMessage(
+                  "assistant",
+                  transcriptText,
+                  msg.timestamp || msg.id || transcriptText
+                );
+              }
+            }
+          }
+
+          if (msg.type === "conversation-update") {
+            const userText = msg.conversation?.transcript?.user;
+            const assistantText = msg.conversation?.transcript?.assistant;
+
+            if (userText) {
+              setLiveUserTranscript(userText);
+            }
+            if (assistantText) {
+              setLiveAssistantTranscript(assistantText);
+            }
+          }
+
+          if (msg.type === "function-call" || msg.type === "tool-calls") {
+            setLastVoiceEvent("Assistant is using tools.");
+          }
+        } catch (err) {
+          console.error("Vapi message handling error:", err);
+          setLastVoiceEvent("Voice message handling issue occurred.");
+        }
+      });
+
+      vapi.on("error", (error) => {
+        console.error("Vapi error:", error);
+        setVoiceConnected(false);
+        setVoiceConnecting(false);
+        setLastVoiceEvent("Voice service had an issue. You can still continue using text chat.");
+      });
+
+      return () => {
+        try {
+          vapi.stop();
+        } catch (e) {
+          console.error("Vapi cleanup stop error:", e);
+        }
+      };
+    } catch (error) {
+      console.error("Vapi initialization failed:", error);
+      setLastVoiceEvent("Vapi initialization failed.");
+    }
   }, []);
 
   const getBestVoice = (langCode) => {
@@ -516,36 +686,34 @@ export default function App() {
     }
   };
 
-  const toggleVoiceInput = () => {
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
-
-    if (!SpeechRecognition) {
-      alert("Speech recognition is not supported in this browser.");
+  const startVoice = async () => {
+    if (!vapiRef.current) {
+      setLastVoiceEvent("Vapi is not initialized.");
       return;
     }
 
-    if (!recognitionRef.current) {
-      const recognition = new SpeechRecognition();
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
-
-      recognition.onstart = () => setListening(true);
-      recognition.onend = () => setListening(false);
-      recognition.onerror = () => setListening(false);
-      recognition.onresult = (event) => {
-        const transcript = event.results?.[0]?.[0]?.transcript || "";
-        setInput((prev) => (prev ? `${prev} ${transcript}` : transcript));
-      };
-
-      recognitionRef.current = recognition;
+    try {
+      setVoiceConnecting(true);
+      setLastVoiceEvent("Connecting voice assistant...");
+      addedTranscriptKeysRef.current.clear();
+      await vapiRef.current.start(VAPI_ASSISTANT_ID);
+    } catch (error) {
+      console.error("Failed to start Vapi:", error);
+      setVoiceConnecting(false);
+      setVoiceConnected(false);
+      setLastVoiceEvent("Could not start voice assistant.");
     }
+  };
 
-    if (listening) {
-      recognitionRef.current.stop();
-    } else {
-      recognitionRef.current.lang = voiceLang;
-      recognitionRef.current.start();
+  const stopVoice = async () => {
+    try {
+      await vapiRef.current?.stop();
+      setVoiceConnected(false);
+      setVoiceConnecting(false);
+      setLastVoiceEvent("Voice assistant stopped.");
+    } catch (error) {
+      console.error("Failed to stop Vapi:", error);
+      setLastVoiceEvent("Could not stop voice assistant cleanly.");
     }
   };
 
@@ -618,7 +786,11 @@ export default function App() {
           "Namaste! I am Sahaya AI. Ask me about healthcare, education, finance, public services, nearby places, schemes, or eligibility.",
       },
     ]);
-    setSpeechStatus("Chat reset complete");
+    setInput("");
+    setLiveUserTranscript("Waiting for voice input...");
+    setLiveAssistantTranscript("Assistant reply will appear here...");
+    setLastVoiceEvent("Chat reset complete.");
+    addedTranscriptKeysRef.current.clear();
   };
 
   return (
@@ -629,8 +801,8 @@ export default function App() {
             <div style={styles.title}>Sahaya AI</div>
             <div style={styles.subtitle}>
               Multilingual government assistance assistant for healthcare,
-              education, finance, public services, schemes, rewards, and nearby
-              help.
+              education, finance, public services, schemes, rewards, nearby help,
+              text chat, live voice interaction, and read-aloud support.
             </div>
           </div>
 
@@ -655,17 +827,34 @@ export default function App() {
                 {statusLabel[backendStatus]}
               </div>
 
-              <div style={{ ...styles.statusBar, ...styles.statusWaking }}>
+              <div
+                style={{
+                  ...styles.statusBar,
+                  ...(voiceConnected
+                    ? styles.statusOnline
+                    : voiceConnecting
+                    ? styles.statusWaking
+                    : styles.statusNeutral),
+                }}
+              >
                 <span
                   style={{
                     width: 8,
                     height: 8,
                     borderRadius: "50%",
-                    background: "#2563eb",
+                    background: voiceConnected
+                      ? "#16a34a"
+                      : voiceConnecting
+                      ? "#ca8a04"
+                      : "#2563eb",
                     display: "inline-block",
                   }}
                 />
-                {speechStatus}
+                {voiceConnected
+                  ? "Voice connected"
+                  : voiceConnecting
+                  ? "Connecting voice..."
+                  : "Voice ready"}
               </div>
             </div>
           </div>
@@ -678,7 +867,8 @@ export default function App() {
                 "Eligibility guidance",
                 "Nearby places",
                 "Rewards and badges",
-                "Voice input",
+                "Live voice",
+                "Live transcript",
                 "Read answer",
                 "Stop reading",
                 "Read draft",
@@ -725,7 +915,7 @@ export default function App() {
           </div>
 
           <div style={styles.card}>
-            <div style={styles.sectionTitle}>Voice settings</div>
+            <div style={styles.sectionTitle}>Voice controls</div>
 
             <label style={styles.small}>
               <input
@@ -734,7 +924,7 @@ export default function App() {
                 onChange={(e) => setAutoRead(e.target.checked)}
                 style={{ marginRight: 8 }}
               />
-              Auto read responses
+              Auto read text responses
             </label>
 
             <div style={{ marginTop: 12 }}>
@@ -752,14 +942,41 @@ export default function App() {
             </div>
 
             <div style={{ marginTop: 12, display: "flex", flexWrap: "wrap" }}>
-              <button style={styles.secondaryButton} onClick={toggleVoiceInput}>
-                {listening ? "🛑 Stop Mic" : "🎤 Voice Input"}
+              <button
+                style={styles.successButton}
+                onClick={startVoice}
+                disabled={voiceConnected || voiceConnecting}
+              >
+                {voiceConnecting ? "Connecting..." : "🎤 Start Voice"}
+              </button>
+
+              <button
+                style={styles.dangerSoftButton}
+                onClick={stopVoice}
+                disabled={!voiceConnected && !voiceConnecting}
+              >
+                🛑 Stop Voice
               </button>
 
               <button style={styles.secondaryButton} onClick={stopSpeaking}>
                 ⏹ Stop Reading
               </button>
             </div>
+
+            <div style={{ marginTop: 12 }} />
+
+            <div style={styles.sectionTitle}>Live user transcript</div>
+            <div style={styles.card}>{liveUserTranscript}</div>
+
+            <div style={{ height: 10 }} />
+
+            <div style={styles.sectionTitle}>Live assistant transcript</div>
+            <div style={styles.card}>{liveAssistantTranscript}</div>
+
+            <div style={{ height: 10 }} />
+
+            <div style={styles.sectionTitle}>Voice status</div>
+            <div style={styles.card}>{lastVoiceEvent}</div>
           </div>
 
           <div>
