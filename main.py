@@ -384,10 +384,6 @@ def ask_question(query: Query):
             maps_result = get_nearby_places(original_query)
             print("Step 6 complete: nearby places processed")
 
-       # (only showing modified parts clearly, rest unchanged)
-
-# ---------------- PROMPT ----------------
-
         prompt = f"""
 You are Sahaya AI, a multilingual government help assistant for Indian citizens.
 
@@ -455,8 +451,7 @@ Style guide:
 - Provide step-by-step guidance when relevant.
 """
 
-# ---------------- MODEL CALL ----------------
-
+        print("Step 7: calling OpenRouter")
         response = get_openrouter_client().chat.completions.create(
             model="openrouter/auto",
             messages=[
@@ -466,14 +461,21 @@ Style guide:
             temperature=0.5,
             timeout=25
         )
-
-# ---------------- RESPONSE FIX ----------------
+        print("Step 7 complete: OpenRouter response received")
+        print("OpenRouter raw choices:", response.choices)
 
         answer = response.choices[0].message.content if response.choices else ""
 
-        # 🔥 Prevent half answers
         if not answer or not answer.strip():
+            print("Step 8: empty answer from OpenRouter")
             answer = "I’m here to help. Please ask your question again, and I will guide you clearly."
 
         if answer.strip().endswith(("and", "or", "ಮತ್ತು", "और")):
             answer += "\n\nPlease tell me your location or occupation so I can guide you better."
+
+        print("Step 8 complete: returning final response")
+        return {"response": answer}
+
+    except Exception as e:
+        print(f"ERROR in /ask: {e}")
+        return {"response": f"Backend error: {str(e)}"}
