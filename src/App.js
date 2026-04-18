@@ -463,7 +463,7 @@ export default function App() {
   const [voiceConnecting, setVoiceConnecting] = useState(false);
   const [liveUserTranscript, setLiveUserTranscript] = useState("Waiting for voice input...");
   const [liveAssistantTranscript, setLiveAssistantTranscript] = useState("Assistant reply will appear here...");
-  const [lastVoiceEvent, setLastVoiceEvent] = useState("Voice assistant is ready.");
+  const [lastVoiceEvent, setLastVoiceEvent] = useState("Voice ready");
 
   const bottomRef = useRef(null);
   const vapiRef = useRef(null);
@@ -548,7 +548,7 @@ export default function App() {
     try {
       vapi = new Vapi(VAPI_PUBLIC_KEY);
       vapiRef.current = vapi;
-      setLastVoiceEvent("Voice assistant is ready.");
+      setLastVoiceEvent("Voice ready");
 
       const appendUniqueChatMessage = (role, content) => {
         const text = (content || "").trim();
@@ -566,7 +566,7 @@ export default function App() {
       vapi.on("call-start", () => {
         setVoiceConnected(true);
         setVoiceConnecting(false);
-        setLastVoiceEvent("Voice call started.");
+        setLastVoiceEvent("Listening...");
         setLiveUserTranscript("Listening...");
         setLiveAssistantTranscript("Assistant reply will appear here...");
       });
@@ -574,15 +574,17 @@ export default function App() {
       vapi.on("call-end", () => {
         setVoiceConnected(false);
         setVoiceConnecting(false);
-        setLastVoiceEvent("Voice call ended.");
+        setTimeout(() => {
+          setLastVoiceEvent("Voice ready");
+        }, 500);
       });
 
       vapi.on("speech-start", () => {
-        setLastVoiceEvent("Assistant is speaking.");
+        setLastVoiceEvent("Assistant speaking...");
       });
 
       vapi.on("speech-end", () => {
-        setLastVoiceEvent("Assistant finished speaking.");
+        setLastVoiceEvent("Voice ready");
       });
 
       vapi.on("message", (msg) => {
@@ -592,7 +594,7 @@ export default function App() {
 
         if (type === "transcript") {
           const role = msg.role || "assistant";
-          const transcriptText = (msg.transcript || "").trim();
+          const transcriptText = String(msg.transcript || "").trim();
           const transcriptType = msg.transcriptType || "";
 
           if (role === "user") {
@@ -637,25 +639,39 @@ export default function App() {
             "";
 
           if (maybeUser) {
-            setLiveUserTranscript(maybeUser);
+            setLiveUserTranscript(String(maybeUser));
           }
 
           if (maybeAssistant) {
-            setLiveAssistantTranscript(maybeAssistant);
+            setLiveAssistantTranscript(String(maybeAssistant));
+
+            if (
+              String(maybeAssistant).trim() &&
+              lastFinalAssistantRef.current !== String(maybeAssistant).trim()
+            ) {
+              lastFinalAssistantRef.current = String(maybeAssistant).trim();
+              appendUniqueChatMessage("assistant", String(maybeAssistant).trim());
+            }
+          }
+
+          if (
+            String(maybeUser).trim() &&
+            lastFinalUserRef.current !== String(maybeUser).trim()
+          ) {
+            lastFinalUserRef.current = String(maybeUser).trim();
+            appendUniqueChatMessage("user", String(maybeUser).trim());
           }
 
           return;
         }
 
         if (type === "function-call" || type === "tool-calls") {
-          setLastVoiceEvent("Assistant is using tools.");
+          setLastVoiceEvent("Assistant is using tools...");
           return;
         }
 
-        if (type === "status-update") {
-          if (msg.status) {
-            setLastVoiceEvent(String(msg.status));
-          }
+        if (type === "status-update" && msg.status) {
+          setLastVoiceEvent(String(msg.status));
         }
       });
 
@@ -663,17 +679,11 @@ export default function App() {
         console.error("Vapi error:", error);
         setVoiceConnected(false);
         setVoiceConnecting(false);
-
-        const safeMessage =
-          error?.message ||
-          error?.error?.message ||
-          "Voice temporarily paused. Please try Start Voice again.";
-
-        setLastVoiceEvent(safeMessage);
+        setLastVoiceEvent("Voice ready");
       });
     } catch (error) {
       console.error("Vapi initialization failed:", error);
-      setLastVoiceEvent("Voice initialization failed.");
+      setLastVoiceEvent("Voice ready");
     }
 
     return () => {
@@ -754,7 +764,7 @@ export default function App() {
 
     try {
       setVoiceConnecting(true);
-      setLastVoiceEvent("Connecting voice assistant...");
+      setLastVoiceEvent("Connecting voice...");
       lastFinalUserRef.current = "";
       lastFinalAssistantRef.current = "";
       setLiveUserTranscript("Listening...");
@@ -764,7 +774,7 @@ export default function App() {
       console.error("Failed to start Vapi:", error);
       setVoiceConnecting(false);
       setVoiceConnected(false);
-      setLastVoiceEvent("Could not start voice assistant.");
+      setLastVoiceEvent("Voice ready");
     }
   };
 
@@ -773,9 +783,9 @@ export default function App() {
       await vapiRef.current?.stop();
       setVoiceConnected(false);
       setVoiceConnecting(false);
-      setLastVoiceEvent("Voice assistant stopped.");
+      setLastVoiceEvent("Voice ready");
     } catch {
-      setLastVoiceEvent("Could not stop voice assistant cleanly.");
+      setLastVoiceEvent("Voice ready");
     }
   };
 
@@ -841,7 +851,7 @@ export default function App() {
     setInput("");
     setLiveUserTranscript("Waiting for voice input...");
     setLiveAssistantTranscript("Assistant reply will appear here...");
-    setLastVoiceEvent("Chat reset complete.");
+    setLastVoiceEvent("Voice ready");
     lastFinalUserRef.current = "";
     lastFinalAssistantRef.current = "";
   };
