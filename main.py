@@ -433,7 +433,7 @@ Response rules:
 - If important eligibility details are missing, ask only those missing details.
 - If a scheme is matched, say why it may fit the user.
 - Use short sections or bullet points only when they improve clarity.
-- Keep the response concise and under 250 words unless the user asks for more detail.
+- Keep the response concise and under 400 words unless the user asks for more detail.
 - Sound practical, warm, and trustworthy.
 - Avoid robotic phrasing.
 - Avoid saying you are just an AI model.
@@ -449,7 +449,7 @@ Provide step-by-step guidance when relevant.
             messages=[
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=500,
+            max_tokens=600,
             timeout=25
         )
         print("Step 7 complete: OpenRouter response received")
