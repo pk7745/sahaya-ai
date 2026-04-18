@@ -12,7 +12,7 @@ const styles = {
   },
   shell: {
     display: "grid",
-    gridTemplateColumns: "280px 1fr",
+    gridTemplateColumns: "290px 1fr",
     minHeight: "100vh",
   },
   sidebar: {
@@ -102,6 +102,26 @@ const styles = {
     fontWeight: "600",
     marginRight: "8px",
     marginTop: "8px",
+  },
+  readButton: {
+    padding: "10px 16px",
+    borderRadius: "12px",
+    border: "none",
+    background: "#2563eb",
+    color: "#ffffff",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "700",
+  },
+  stopButton: {
+    padding: "10px 16px",
+    borderRadius: "12px",
+    border: "none",
+    background: "#dc2626",
+    color: "#ffffff",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "700",
   },
   main: {
     display: "flex",
@@ -193,6 +213,13 @@ const styles = {
     lineHeight: 1.75,
     fontSize: "15px",
   },
+  answerActions: {
+    marginTop: "14px",
+    display: "flex",
+    gap: "10px",
+    flexWrap: "wrap",
+    alignItems: "center",
+  },
   controls: {
     padding: "18px 24px 24px",
     borderTop: "1px solid #e5e7eb",
@@ -240,10 +267,10 @@ function cleanTextForSpeech(text) {
 
 function detectSpeechLang(text, fallback = "en-IN") {
   if (!text) return fallback;
-  if (/[\u0C80-\u0CFF]/.test(text)) return "kn-IN";
-  if (/[\u0900-\u097F]/.test(text)) return "hi-IN";
-  if (/[\u0B80-\u0BFF]/.test(text)) return "ta-IN";
-  if (/[\u0C00-\u0C7F]/.test(text)) return "te-IN";
+  if (/[\u0C80-\u0CFF]/.test(text)) return "kn-IN"; // Kannada
+  if (/[\u0900-\u097F]/.test(text)) return "hi-IN"; // Hindi / Devanagari
+  if (/[\u0B80-\u0BFF]/.test(text)) return "ta-IN"; // Tamil
+  if (/[\u0C00-\u0C7F]/.test(text)) return "te-IN"; // Telugu
   return fallback || "en-IN";
 }
 
@@ -407,7 +434,6 @@ export default function App() {
 
     if (!recognitionRef.current) {
       const recognition = new SpeechRecognition();
-      recognition.lang = voiceLang;
       recognition.interimResults = false;
       recognition.maxAlternatives = 1;
 
@@ -683,23 +709,16 @@ export default function App() {
                     {message.content}
 
                     {message.role === "assistant" && (
-                      <div
-                        style={{
-                          marginTop: 12,
-                          display: "flex",
-                          gap: "8px",
-                          flexWrap: "wrap",
-                        }}
-                      >
+                      <div style={styles.answerActions}>
                         <button
-                          style={styles.secondaryButton}
+                          style={styles.readButton}
                           onClick={() => speak(message.content)}
                         >
                           🔊 Read
                         </button>
 
                         <button
-                          style={styles.secondaryButton}
+                          style={styles.stopButton}
                           onClick={stopSpeaking}
                         >
                           ⏹ Stop
