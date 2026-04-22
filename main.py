@@ -5,6 +5,7 @@ from deep_translator import GoogleTranslator
 import os
 import requests
 import re
+import time
 
 app = FastAPI()
 
@@ -20,6 +21,26 @@ collection_name = "knowledge_base"
 
 qdrant_client_instance = None
 openrouter_client_instance = None
+
+# ---------------- HEALTHOS RUNTIME STATE ----------------
+
+patients_queue = []
+department_load = {
+    "general": 0,
+    "emergency": 0,
+    "cardiology": 0,
+    "pediatrics": 0,
+    "orthopedics": 0,
+    "gynecology": 0,
+}
+
+DIGITAL_TWIN_NOTES = [
+    "Emergency pressure is stable.",
+    "General medicine is receiving regular walk-ins.",
+    "Critical cases are prioritized automatically.",
+    "Queue balancing is active.",
+    "Staff summaries are being generated in real time.",
+]
 
 # ---------------- CLIENTS ----------------
 
@@ -63,7 +84,7 @@ def get_openrouter_client():
 
 @app.on_event("startup")
 async def startup_event():
-    print("Startup: lightweight mode enabled (no local embedding model preload)")
+    print("Startup: lightweight mode enabled")
     try:
         get_qdrant_client()
     except Exception as e:
@@ -72,6 +93,93 @@ async def startup_event():
         get_openrouter_client()
     except Exception as e:
         print(f"Startup: OpenRouter client init failed: {e}")
+
+
+# ---------------- HEALTHOS INTELLIGENCE ----------------
+
+def detect_emergency_level(user_query: str) -> str:
+    q = user_query.lower()
+
+    high_risk_terms = [
+        "chest pain", "heart attack", "breathing problem", "difficulty breathing",
+        "accident", "bleeding", "stroke", "unconscious", "severe pain", "sweating"
+    ]
+    medium_risk_terms = [
+        "fever", "vomiting", "infection", "cough", "body pain", "dizziness", "headache"
+    ]
+
+    if any(term in q for term in high_risk_terms):
+        return "HIGH"
+    if any(term in q for term in medium_risk_terms):
+        return "MEDIUM"
+    return "LOW"
+
+
+def assign_department(user_query: str) -> str:
+    q = user_query.lower()
+
+    if "chest" in q or "heart" in q or "cardiac" in q:
+        return "cardiology"
+    if "pregnant" in q or "pregnancy" in q or "delivery" in q:
+        return "gynecology"
+    if "child" in q or "baby" in q or "kid" in q:
+        return "pediatrics"
+    if "fracture" in q or "bone" in q or "injury" in q:
+        return "orthopedics"
+    if "accident" in q or "bleeding" in q or "unconscious" in q:
+        return "emergency"
+    return "general"
+
+
+def add_patient_to_queue(user_query: str):
+    urgency = detect_emergency_level(user_query)
+    department = assign_department(user_query)
+
+    patient = {
+        "id": len(patients_queue) + 1,
+        "query": user_query,
+        "urgency": urgency,
+        "department": department,
+        "created_at": int(time.time())
+    }
+
+    patients_queue.append(patient)
+    department_load[department] = department_load.get(department, 0) + 1
+
+    priority_map = {"HIGH": 3, "MEDIUM": 2, "LOW": 1}
+    patients_queue.sort(
+        key=lambda x: (priority_map.get(x["urgency"], 1), -x["created_at"]),
+        reverse=True
+    )
+
+    return patient
+
+
+def get_queue_position(patient_id: int) -> int:
+    for idx, patient in enumerate(patients_queue):
+        if patient["id"] == patient_id:
+            return idx + 1
+    return len(patients_queue)
+
+
+def generate_staff_summary(patient: dict) -> str:
+    return f"""Patient ID: {patient['id']}
+Urgency: {patient['urgency']}
+Department: {patient['department']}
+Reported Issue: {patient['query']}
+Action: Prioritize according to urgency and route to the assigned department."""
+
+
+def generate_live_operations_note() -> str:
+    if not patients_queue:
+        return "Hospital flow is stable. No active queue pressure right now."
+
+    high_cases = sum(1 for p in patients_queue if p["urgency"] == "HIGH")
+    if high_cases >= 2:
+        return "High-priority cases are active. Emergency coordination should be watched closely."
+
+    busiest_department = max(department_load, key=department_load.get)
+    return f"The busiest department right now is {busiest_department}."
 
 
 # ---------------- SCHEME DETECTOR ----------------
@@ -205,7 +313,7 @@ user_rewards = {
 }
 
 
-def update_rewards(user_query, smart_eligibility, scheme_info):
+def update_rewards(smart_eligibility, scheme_info):
     user_rewards["points"] += 5
 
     if scheme_info:
@@ -223,7 +331,7 @@ Reward Update:
 - Total Points: {user_rewards["points"]}
 - Badges Earned: {", ".join(user_rewards["badges"]) if user_rewards["badges"] else "None"}
 """
-    return reward_message
+    return reward_message.strip()
 
 
 # ---------------- MAP SEARCH ----------------
@@ -316,28 +424,47 @@ def lightweight_qdrant_context(user_query, limit=2, scan_limit=30):
             explanation = payload.get("explanation", "")
             solution = payload.get("solutions") or payload.get("solution", "")
 
-            context_parts.append(f"""
-Category: {category}
-Problem: {problem}
-Explanation: {explanation}
-Solution: {solution}
-""")
+            context_parts.append(
+                f"Category: {category}\nProblem: {problem}\nExplanation: {explanation}\nSolution: {solution}"
+            )
 
-        return "\n".join(context_parts).strip()
+        return "\n\n".join(context_parts).strip()
 
     except Exception as e:
         print(f"Lightweight Qdrant retrieval failed: {e}")
         return "No matching knowledge found in the database."
 
 
+# ---------------- REQUEST MODEL ----------------
+
 class Query(BaseModel):
     query: str = ""
     message: str = ""
 
 
+# ---------------- ROUTES ----------------
+
 @app.get("/")
 def root():
-    return {"status": "ok", "message": "Sahaya AI backend is running"}
+    return {"status": "ok", "message": "Sahaya HealthOS backend is running"}
+
+
+@app.get("/dashboard")
+def dashboard():
+    high_cases = sum(1 for p in patients_queue if p["urgency"] == "HIGH")
+    medium_cases = sum(1 for p in patients_queue if p["urgency"] == "MEDIUM")
+    low_cases = sum(1 for p in patients_queue if p["urgency"] == "LOW")
+
+    return {
+        "total_patients": len(patients_queue),
+        "high_priority_cases": high_cases,
+        "medium_priority_cases": medium_cases,
+        "low_priority_cases": low_cases,
+        "department_load": department_load,
+        "queue_preview": patients_queue[:6],
+        "digital_twin_note": generate_live_operations_note(),
+        "digital_twin_feed": DIGITAL_TWIN_NOTES[:]
+    }
 
 
 @app.post("/ask-test")
@@ -359,6 +486,10 @@ def ask_question(query: Query):
 
         print(f"Step 2: original query: {original_query}")
 
+        patient = add_patient_to_queue(original_query)
+        queue_position = get_queue_position(patient["id"])
+        staff_summary = generate_staff_summary(patient)
+
         try:
             translated_query = GoogleTranslator(source="auto", target="en").translate(original_query)
             print(f"Step 3: translated query: {translated_query}")
@@ -374,18 +505,18 @@ def ask_question(query: Query):
         eligibility = eligibility_question(original_query)
         location_info = location_help(original_query)
         smart_eligibility = smart_eligibility_flow(original_query)
-        reward_info = update_rewards(original_query, smart_eligibility, scheme_info)
+        reward_info = update_rewards(smart_eligibility, scheme_info)
 
         print("Step 5: extra feature processing complete")
 
         maps_result = ""
-        if any(word in original_query.lower() for word in ["hospital", "bank", "police", "ration", "near", "nearby", "location", "place"]):
+        if any(word in original_query.lower() for word in ["hospital", "bank", "police", "ration", "near", "nearby", "location", "place", "pain", "fever", "accident", "doctor"]):
             print("Step 6: fetching nearby places")
             maps_result = get_nearby_places(original_query)
             print("Step 6 complete: nearby places processed")
 
         prompt = f"""
-You are Sahaya AI, a multilingual government help assistant for Indian citizens.
+You are Sahaya HealthOS, a multilingual healthcare and public assistance assistant for Indian citizens.
 
 Your job:
 - Give practical, accurate, citizen-friendly guidance.
@@ -399,16 +530,16 @@ User question:
 Translated English query:
 {translated_query}
 
-Helpful government information:
+Helpful knowledge:
 {context}
 
-Relevant government schemes (IMPORTANT - must include if available):
+Relevant government schemes:
 {scheme_info}
 
-Nearby location help (IMPORTANT - include if relevant):
+Nearby location help:
 {location_info}
 
-Real nearby places (IMPORTANT - include if available):
+Real nearby places:
 {maps_result}
 
 If more details are needed:
@@ -420,51 +551,52 @@ Smart eligibility follow-up:
 Best matched scheme based on available details:
 {smart_eligibility["matched_scheme"]}
 
-User rewards (IMPORTANT - include if available):
+User rewards:
 {reward_info}
+
+Triage result:
+- Urgency: {patient["urgency"]}
+- Department: {patient["department"]}
+- Queue Position: {queue_position}
+
+Staff summary:
+{staff_summary}
 
 Response rules:
 - Reply in the same language as the user whenever possible.
 - Start with the most useful direct answer first.
 - Use very simple, citizen-friendly language that even low-literacy users can understand.
 - Keep sentences short and clear.
-- Keep the response concise and under 180 words.
+- Keep the response concise and under 220 words.
 - Always complete the answer. Never stop mid-sentence.
+- Mention urgency, department, and next step naturally when medically relevant.
 - If schemes are available, mention them clearly and naturally.
 - If a scheme matches the user, explain in one simple line why it may help them.
 - If location help is relevant, include it clearly.
 - If real nearby places are available, mention them clearly.
 - If the user already provided enough details, do not ask repeated questions.
-- If important eligibility details are missing, ask only 1 or 2 missing questions at the end.
-- Prefer short bullet points or very small paragraphs when they improve clarity.
+- If important details are missing, ask only 1 or 2 missing questions at the end.
+- Prefer short bullet points or small paragraphs when they improve clarity.
 - Give practical next steps the user can do immediately.
 - Sound warm, respectful, trustworthy, and like an official citizen helpdesk.
 - Avoid robotic wording, jargon, and complex terms.
 - Do not say you are an AI model.
-- Avoid long explanations unless the user asks for them.
 - End with one clear next step when useful.
-
-Style guide:
-- Write like a helpful digital government officer with the warmth of a community volunteer.
-- Focus on clarity, usefulness, and action.
-- Explain clearly so common citizens can understand easily.
-- Provide step-by-step guidance when relevant.
 """
 
         print("Step 7: calling OpenRouter")
         response = get_openrouter_client().chat.completions.create(
             model="openrouter/auto",
-            messages=[
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=350,
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=420,
             temperature=0.5,
             timeout=25
         )
         print("Step 7 complete: OpenRouter response received")
-        print("OpenRouter raw choices:", response.choices)
 
-        answer = response.choices[0].message.content if response.choices else ""
+        answer = ""
+        if response.choices and response.choices[0].message:
+            answer = response.choices[0].message.content or ""
 
         if not answer or not answer.strip():
             print("Step 8: empty answer from OpenRouter")
@@ -473,8 +605,19 @@ Style guide:
         if answer.strip().endswith(("and", "or", "ಮತ್ತು", "और")):
             answer += "\n\nPlease tell me your location or occupation so I can guide you better."
 
+        healthos_block = f"""
+
+HealthOS Triage:
+- Urgency: {patient["urgency"]}
+- Department: {patient["department"]}
+- Queue Position: {queue_position}
+
+Staff Summary:
+{staff_summary}
+"""
+
         print("Step 8 complete: returning final response")
-        return {"response": answer}
+        return {"response": (answer.strip() + "\n" + healthos_block.strip()).strip()}
 
     except Exception as e:
         print(f"ERROR in /ask: {e}")
