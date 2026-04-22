@@ -12,8 +12,7 @@ client = QdrantClient(
 collection_name = "knowledge_base"
 
 
-def search_knowledge(query):
-
+def search_knowledge(query: str):
     vector = model.encode(query)
 
     results = client.query_points(
@@ -23,17 +22,23 @@ def search_knowledge(query):
     )
 
     answers = []
+    points = getattr(results, "points", []) or []
 
-    for hit in results.points:
+    for hit in points:
+        payload = hit.payload or {}
 
-        category = hit.payload["category"]
-        problem = hit.payload["problem"]
-        explanation = hit.payload["explanation"]
+        category = payload.get("category", "General")
+        problem = payload.get("problem", "Not specified")
+        explanation = payload.get("explanation", "No explanation available.")
+        solutions = payload.get("solutions") or payload.get("solution") or []
 
-        solutions = hit.payload.get("solutions") or hit.payload.get("solution")
+        if isinstance(solutions, str):
+            solutions = [solutions]
 
-        response = f"""
-Category: {category}
+        response = f"""Category: {category}
+
+Problem:
+{problem}
 
 Understanding the Problem:
 {explanation}
@@ -41,12 +46,12 @@ Understanding the Problem:
 Possible Solutions:
 """
 
-        if isinstance(solutions, str):
-            solutions = [solutions]
+        if solutions:
+            for step in solutions:
+                response += f"- {step}\n"
+        else:
+            response += "- No specific solution found.\n"
 
-        for step in solutions:
-            response += f"- {step}\n"
-
-        answers.append(response)
+        answers.append(response.strip())
 
     return answers
