@@ -5,202 +5,315 @@ const API_BASE =
   import.meta.env.VITE_API_BASE || "https://sahaya-ai-3ss2.onrender.com";
 
 const VAPI_PUBLIC_KEY =
-  import.meta.env.VITE_VAPI_PUBLIC_KEY || "61488fad-b9ee-4287-9917-691d2e1f202b";
+  import.meta.env.VITE_VAPI_PUBLIC_KEY || "";
 
 const VAPI_ASSISTANT_ID =
-  import.meta.env.VITE_VAPI_ASSISTANT_ID || "9f2a4ad1-c6d3-4520-a766-f8ed67dc483d";
+  import.meta.env.VITE_VAPI_ASSISTANT_ID || "";
 
 const styles = {
   app: {
     minHeight: "100vh",
-    background: "#f7f7f8",
-    fontFamily: "Inter, Arial, sans-serif",
-    color: "#111827",
+    background: "linear-gradient(180deg, #08111f 0%, #0b1730 30%, #101b33 100%)",
+    fontFamily:
+      'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    color: "#e5eefc",
+    width: "100%",
+    overflowX: "hidden",
   },
-  shell: {
+  shellDesktop: {
     display: "grid",
-    gridTemplateColumns: "320px 1fr",
+    gridTemplateColumns: "340px minmax(0, 1fr)",
     minHeight: "100vh",
+    width: "100%",
+    maxWidth: "100vw",
+    overflowX: "hidden",
+  },
+  shellMobile: {
+    display: "flex",
+    flexDirection: "column",
+    minHeight: "100vh",
+    width: "100%",
+    maxWidth: "100vw",
+    overflowX: "hidden",
   },
   sidebar: {
-    background: "#ffffff",
-    borderRight: "1px solid #e5e7eb",
-    padding: "20px 18px",
+    background: "rgba(7,16,31,0.88)",
+    backdropFilter: "blur(14px)",
+    borderRight: "1px solid rgba(148,163,184,0.12)",
+    padding: "22px",
     display: "flex",
     flexDirection: "column",
     gap: "18px",
+    minWidth: 0,
+    boxShadow: "18px 0 40px rgba(0,0,0,0.18)",
   },
-  brandWrap: {
-    paddingBottom: "10px",
-    borderBottom: "1px solid #eef2f7",
+  sidebarMobile: {
+    background: "rgba(7,16,31,0.92)",
+    backdropFilter: "blur(14px)",
+    borderBottom: "1px solid rgba(148,163,184,0.12)",
+    padding: "16px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "16px",
+    minWidth: 0,
+  },
+  brand: {
+    paddingBottom: "14px",
+    borderBottom: "1px solid rgba(148,163,184,0.14)",
   },
   title: {
-    fontSize: "34px",
-    fontWeight: "800",
+    fontSize: "32px",
+    fontWeight: "900",
     marginBottom: "8px",
-    letterSpacing: "-0.03em",
-    color: "#111827",
+    letterSpacing: "-0.04em",
+    color: "#f8fbff",
   },
   subtitle: {
-    fontSize: "14px",
-    color: "#6b7280",
-    lineHeight: 1.6,
+    fontSize: "13.5px",
+    color: "#93a5bf",
+    lineHeight: 1.7,
   },
   sectionTitle: {
-    fontSize: "15px",
-    fontWeight: "800",
-    marginBottom: "10px",
-    color: "#111827",
-  },
-  statusRow: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: "8px",
-  },
-  statusBar: {
     fontSize: "12px",
-    padding: "8px 12px",
-    borderRadius: "999px",
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "7px",
-    fontWeight: "700",
+    fontWeight: "900",
+    marginBottom: "10px",
+    color: "#dbeafe",
+    textTransform: "uppercase",
+    letterSpacing: "0.1em",
   },
-  statusOnline: {
-    background: "#dcfce7",
-    color: "#166534",
-    border: "1px solid #bbf7d0",
-  },
-  statusOffline: {
-    background: "#fee2e2",
-    color: "#991b1b",
-    border: "1px solid #fecaca",
-  },
-  statusWaking: {
-    background: "#fef3c7",
-    color: "#92400e",
-    border: "1px solid #fde68a",
-  },
-  capabilities: {
+  pillWrap: {
     display: "flex",
     flexWrap: "wrap",
     gap: "8px",
   },
   pill: {
-    background: "#f9fafb",
-    border: "1px solid #d1d5db",
-    color: "#374151",
-    padding: "8px 12px",
+    background: "rgba(59,130,246,0.10)",
+    border: "1px solid rgba(96,165,250,0.20)",
+    color: "#dbeafe",
+    padding: "7px 11px",
     borderRadius: "999px",
     fontSize: "12px",
-    fontWeight: "600",
+    fontWeight: "700",
+  },
+  card: {
+    background: "linear-gradient(180deg, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0.82) 100%)",
+    border: "1px solid rgba(148,163,184,0.16)",
+    borderRadius: "20px",
+    padding: "14px",
+    boxShadow: "0 14px 30px rgba(0,0,0,0.20)",
+  },
+  transcriptCard: {
+    background: "rgba(15,23,42,0.82)",
+    border: "1px solid rgba(148,163,184,0.14)",
+    borderRadius: "14px",
+    padding: "12px 13px",
+    fontSize: "13px",
+    color: "#e2e8f0",
+    lineHeight: 1.6,
+    minHeight: "52px",
+    whiteSpace: "pre-wrap",
+    wordBreak: "break-word",
   },
   quickButton: {
     width: "100%",
     textAlign: "left",
-    padding: "14px 14px",
-    borderRadius: "14px",
-    border: "1px solid #e5e7eb",
-    background: "#ffffff",
+    padding: "13px 14px",
+    borderRadius: "16px",
+    border: "1px solid rgba(148,163,184,0.16)",
+    background: "linear-gradient(180deg, rgba(30,41,59,0.90) 0%, rgba(15,23,42,0.95) 100%)",
     cursor: "pointer",
     marginBottom: "10px",
     fontSize: "14px",
     fontWeight: "700",
-    color: "#111827",
+    color: "#f8fbff",
   },
   small: {
     fontSize: "13px",
-    color: "#6b7280",
-    lineHeight: 1.5,
+    color: "#9fb0c8",
+    lineHeight: 1.6,
   },
-  primaryVoiceButton: {
-    padding: "12px 16px",
+  select: {
+    width: "100%",
+    padding: "12px 14px",
     borderRadius: "14px",
-    border: "none",
-    background: "#111827",
-    color: "#fff",
+    border: "1px solid rgba(148,163,184,0.18)",
+    fontSize: "14px",
+    background: "#0f172a",
+    color: "#e5eefc",
+    outline: "none",
+    boxSizing: "border-box",
+  },
+  secondaryButton: {
+    padding: "10px 14px",
+    borderRadius: "14px",
+    border: "1px solid rgba(148,163,184,0.18)",
+    background: "rgba(15,23,42,0.85)",
+    color: "#e5eefc",
     cursor: "pointer",
     fontSize: "14px",
     fontWeight: "700",
     marginRight: "8px",
+    marginTop: "8px",
   },
-  dangerButton: {
-    padding: "12px 16px",
-    borderRadius: "14px",
-    border: "1px solid #fecaca",
-    background: "#fff1f2",
-    color: "#991b1b",
-    cursor: "pointer",
-    fontSize: "14px",
-    fontWeight: "700",
-  },
-  secondaryButton: {
+  successButton: {
     padding: "10px 14px",
-    borderRadius: "12px",
-    border: "1px solid #d1d5db",
-    background: "#fff",
-    color: "#111827",
+    borderRadius: "14px",
+    border: "none",
+    background: "linear-gradient(180deg, #22c55e 0%, #16a34a 100%)",
+    color: "#fff",
     cursor: "pointer",
     fontSize: "14px",
-    fontWeight: "600",
+    fontWeight: "800",
+    marginRight: "8px",
+    marginTop: "8px",
+    boxShadow: "0 10px 22px rgba(34,197,94,0.25)",
   },
-  transcriptBox: {
-    marginTop: "10px",
-    background: "#f9fafb",
-    border: "1px solid #e5e7eb",
+  dangerSoftButton: {
+    padding: "10px 14px",
     borderRadius: "14px",
-    padding: "12px",
-    minHeight: "70px",
+    border: "1px solid rgba(254,202,202,0.24)",
+    background: "linear-gradient(180deg, rgba(127,29,29,0.30) 0%, rgba(153,27,27,0.18) 100%)",
+    color: "#fecaca",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "800",
+    marginRight: "8px",
+    marginTop: "8px",
   },
-  transcriptLabel: {
-    fontSize: "12px",
-    color: "#6b7280",
-    fontWeight: "700",
-    marginBottom: "6px",
+  readButton: {
+    padding: "11px 18px",
+    borderRadius: "14px",
+    border: "none",
+    background: "linear-gradient(180deg, #3b82f6 0%, #2563eb 100%)",
+    color: "#ffffff",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "800",
   },
-  transcriptText: {
-    fontSize: "13px",
-    color: "#111827",
-    lineHeight: 1.6,
-    whiteSpace: "pre-wrap",
+  stopButton: {
+    padding: "11px 18px",
+    borderRadius: "14px",
+    border: "none",
+    background: "linear-gradient(180deg, #ef4444 0%, #dc2626 100%)",
+    color: "#ffffff",
+    cursor: "pointer",
+    fontSize: "14px",
+    fontWeight: "800",
   },
   main: {
     display: "flex",
     flexDirection: "column",
     minHeight: "100vh",
-    background: "#ffffff",
+    background: "transparent",
+    minWidth: 0,
+    width: "100%",
   },
   topBar: {
-    padding: "18px 24px",
-    borderBottom: "1px solid #e5e7eb",
-    background: "#ffffff",
+    padding: "22px 28px",
+    borderBottom: "1px solid rgba(148,163,184,0.12)",
+    background: "rgba(6,14,28,0.65)",
+    backdropFilter: "blur(14px)",
+  },
+  topBarMobile: {
+    padding: "16px",
+    borderBottom: "1px solid rgba(148,163,184,0.12)",
+    background: "rgba(6,14,28,0.70)",
+    backdropFilter: "blur(14px)",
   },
   topTitle: {
-    fontSize: "28px",
-    fontWeight: "800",
+    fontSize: "30px",
+    fontWeight: "900",
     marginBottom: "6px",
-    letterSpacing: "-0.03em",
+    letterSpacing: "-0.04em",
+    color: "#f8fbff",
   },
   topSubtitle: {
     fontSize: "14px",
-    color: "#6b7280",
+    color: "#9fb0c8",
     lineHeight: 1.6,
   },
-  voiceCard: {
-    marginTop: "14px",
-    background: "#f9fafb",
-    border: "1px solid #e5e7eb",
-    borderRadius: "16px",
-    padding: "14px",
+  statusRow: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "8px",
+    marginTop: "12px",
+  },
+  statusBar: {
+    fontSize: "12px",
+    padding: "7px 12px",
+    borderRadius: "999px",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "7px",
+    fontWeight: "800",
+  },
+  statusOnline: {
+    background: "rgba(34,197,94,0.15)",
+    color: "#86efac",
+    border: "1px solid rgba(34,197,94,0.24)",
+  },
+  statusOffline: {
+    background: "rgba(239,68,68,0.14)",
+    color: "#fca5a5",
+    border: "1px solid rgba(239,68,68,0.24)",
+  },
+  statusWaking: {
+    background: "rgba(245,158,11,0.14)",
+    color: "#fcd34d",
+    border: "1px solid rgba(245,158,11,0.24)",
+  },
+  statusNeutral: {
+    background: "rgba(59,130,246,0.14)",
+    color: "#93c5fd",
+    border: "1px solid rgba(59,130,246,0.24)",
+  },
+  navTabs: {
+    display: "flex",
+    gap: "10px",
+    flexWrap: "wrap",
+    marginTop: "16px",
+  },
+  navTab: {
+    padding: "10px 14px",
+    borderRadius: "14px",
+    border: "1px solid rgba(148,163,184,0.16)",
+    background: "rgba(15,23,42,0.72)",
+    color: "#dbeafe",
+    cursor: "pointer",
+    fontWeight: "700",
+    fontSize: "14px",
+  },
+  navTabActive: {
+    padding: "10px 14px",
+    borderRadius: "14px",
+    border: "1px solid rgba(96,165,250,0.22)",
+    background: "linear-gradient(180deg, rgba(37,99,235,0.32) 0%, rgba(30,64,175,0.32) 100%)",
+    color: "#ffffff",
+    cursor: "pointer",
+    fontWeight: "800",
+    fontSize: "14px",
   },
   chat: {
     flex: 1,
-    padding: "24px",
+    padding: "28px",
     overflowY: "auto",
     display: "flex",
     flexDirection: "column",
     gap: "18px",
-    background: "#ffffff",
+    background:
+      "radial-gradient(circle at top, rgba(59,130,246,0.08), transparent 26%)",
+    minWidth: 0,
+  },
+  chatMobile: {
+    flex: 1,
+    padding: "16px",
+    overflowY: "auto",
+    display: "flex",
+    flexDirection: "column",
+    gap: "16px",
+    background:
+      "radial-gradient(circle at top, rgba(59,130,246,0.08), transparent 26%)",
+    minWidth: 0,
   },
   bubbleWrapUser: {
     display: "flex",
@@ -212,69 +325,214 @@ const styles = {
   },
   bubbleUser: {
     maxWidth: "78%",
-    background: "#111827",
+    background: "linear-gradient(180deg, #1d4ed8 0%, #1e3a8a 100%)",
     color: "#fff",
     padding: "16px 18px",
-    borderRadius: "18px 18px 6px 18px",
+    borderRadius: "22px 22px 8px 22px",
     whiteSpace: "pre-wrap",
     lineHeight: 1.75,
     fontSize: "15px",
+    wordBreak: "break-word",
+    boxShadow: "0 14px 30px rgba(30,64,175,0.24)",
   },
-  bubbleBot: {
-    maxWidth: "78%",
-    background: "#f9fafb",
-    color: "#111827",
-    padding: "16px 18px",
-    borderRadius: "18px 18px 18px 6px",
-    border: "1px solid #e5e7eb",
-    whiteSpace: "pre-wrap",
-    lineHeight: 1.75,
-    fontSize: "15px",
-  },
-  bubbleSystem: {
-    maxWidth: "78%",
-    background: "#fef3c7",
-    color: "#92400e",
+  bubbleUserMobile: {
+    maxWidth: "92%",
+    background: "linear-gradient(180deg, #1d4ed8 0%, #1e3a8a 100%)",
+    color: "#fff",
     padding: "14px 16px",
-    borderRadius: "16px",
-    border: "1px solid #fde68a",
+    borderRadius: "20px 20px 8px 20px",
     whiteSpace: "pre-wrap",
     lineHeight: 1.7,
     fontSize: "14px",
+    wordBreak: "break-word",
+  },
+  bubbleBot: {
+    maxWidth: "78%",
+    background: "rgba(15,23,42,0.88)",
+    color: "#e5eefc",
+    padding: "16px 18px",
+    borderRadius: "22px 22px 22px 8px",
+    border: "1px solid rgba(148,163,184,0.14)",
+    whiteSpace: "pre-wrap",
+    lineHeight: 1.75,
+    fontSize: "15px",
+    wordBreak: "break-word",
+    boxShadow: "0 12px 26px rgba(0,0,0,0.18)",
+  },
+  bubbleBotMobile: {
+    maxWidth: "92%",
+    background: "rgba(15,23,42,0.92)",
+    color: "#e5eefc",
+    padding: "14px 16px",
+    borderRadius: "20px 20px 20px 8px",
+    border: "1px solid rgba(148,163,184,0.14)",
+    whiteSpace: "pre-wrap",
+    lineHeight: 1.7,
+    fontSize: "14px",
+    wordBreak: "break-word",
+  },
+  answerActions: {
+    marginTop: "14px",
+    display: "flex",
+    gap: "10px",
+    flexWrap: "wrap",
+    alignItems: "center",
   },
   controls: {
     padding: "18px 24px 24px",
-    borderTop: "1px solid #e5e7eb",
-    background: "#ffffff",
+    borderTop: "1px solid rgba(148,163,184,0.12)",
+    background: "rgba(6,14,28,0.72)",
+    backdropFilter: "blur(14px)",
+  },
+  controlsMobile: {
+    padding: "16px",
+    borderTop: "1px solid rgba(148,163,184,0.12)",
+    background: "rgba(6,14,28,0.76)",
+    backdropFilter: "blur(14px)",
   },
   inputRow: {
     display: "flex",
     gap: "12px",
     marginBottom: "12px",
   },
+  inputRowMobile: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px",
+    marginBottom: "12px",
+  },
   input: {
     flex: 1,
     padding: "16px 18px",
-    borderRadius: "16px",
-    border: "1px solid #d1d5db",
+    borderRadius: "18px",
+    border: "1px solid rgba(148,163,184,0.16)",
     fontSize: "15px",
     outline: "none",
-    background: "#fff",
+    background: "rgba(15,23,42,0.88)",
+    color: "#f8fbff",
+    minWidth: 0,
+    boxSizing: "border-box",
   },
-  sendButton: {
+  button: {
     padding: "14px 20px",
-    borderRadius: "16px",
+    borderRadius: "18px",
     border: "none",
-    background: "#111827",
+    background: "linear-gradient(180deg, #3b82f6 0%, #2563eb 100%)",
     color: "#fff",
     cursor: "pointer",
     fontSize: "14px",
-    fontWeight: "700",
+    fontWeight: "800",
+    boxShadow: "0 12px 24px rgba(37,99,235,0.24)",
   },
   footerRow: {
     display: "flex",
     flexWrap: "wrap",
     gap: "8px",
+  },
+  sectionPanel: {
+    background: "rgba(15,23,42,0.72)",
+    border: "1px solid rgba(148,163,184,0.14)",
+    borderRadius: "22px",
+    padding: "18px",
+    boxShadow: "0 14px 28px rgba(0,0,0,0.16)",
+  },
+  statGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+    gap: "14px",
+    marginBottom: "18px",
+  },
+  statCard: {
+    background: "linear-gradient(180deg, rgba(30,41,59,0.92) 0%, rgba(15,23,42,0.92) 100%)",
+    border: "1px solid rgba(148,163,184,0.14)",
+    borderRadius: "18px",
+    padding: "16px",
+  },
+  statLabel: {
+    fontSize: "12px",
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
+    color: "#93a5bf",
+    marginBottom: "6px",
+    fontWeight: "800",
+  },
+  statValue: {
+    fontSize: "26px",
+    fontWeight: "900",
+    color: "#f8fbff",
+  },
+  listCard: {
+    background: "rgba(15,23,42,0.88)",
+    border: "1px solid rgba(148,163,184,0.14)",
+    borderRadius: "16px",
+    padding: "14px",
+    marginBottom: "10px",
+    color: "#e5eefc",
+  },
+  homeHero: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "flex-start",
+    minHeight: "calc(100vh - 180px)",
+    padding: "28px",
+  },
+  heroBadge: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "8px",
+    padding: "8px 14px",
+    borderRadius: "999px",
+    background: "rgba(59,130,246,0.14)",
+    border: "1px solid rgba(96,165,250,0.20)",
+    color: "#bfdbfe",
+    fontWeight: "800",
+    fontSize: "12px",
+    marginBottom: "18px",
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
+  },
+  heroTitle: {
+    fontSize: "48px",
+    lineHeight: 1.04,
+    letterSpacing: "-0.05em",
+    fontWeight: "950",
+    color: "#ffffff",
+    maxWidth: "760px",
+    marginBottom: "14px",
+  },
+  heroText: {
+    fontSize: "16px",
+    lineHeight: 1.8,
+    color: "#9fb0c8",
+    maxWidth: "760px",
+    marginBottom: "20px",
+  },
+  heroActions: {
+    display: "flex",
+    gap: "12px",
+    flexWrap: "wrap",
+  },
+  heroButtonPrimary: {
+    padding: "14px 18px",
+    borderRadius: "16px",
+    border: "none",
+    background: "linear-gradient(180deg, #3b82f6 0%, #2563eb 100%)",
+    color: "#fff",
+    cursor: "pointer",
+    fontWeight: "800",
+    fontSize: "15px",
+    boxShadow: "0 14px 26px rgba(37,99,235,0.24)",
+  },
+  heroButtonSecondary: {
+    padding: "14px 18px",
+    borderRadius: "16px",
+    border: "1px solid rgba(148,163,184,0.18)",
+    background: "rgba(15,23,42,0.72)",
+    color: "#e5eefc",
+    cursor: "pointer",
+    fontWeight: "800",
+    fontSize: "15px",
   },
 };
 
@@ -283,7 +541,20 @@ function extractMapLinks(text) {
   return text.match(regex) || [];
 }
 
-async function fetchWithTimeout(url, options = {}, timeoutMs = 35000) {
+function cleanTextForSpeech(text) {
+  return text.replace(/https?:\/\/\S+/g, "").replace(/\s+/g, " ").trim();
+}
+
+function detectSpeechLang(text, fallback = "en-IN") {
+  if (!text) return fallback;
+  if (/[\u0C80-\u0CFF]/.test(text)) return "kn-IN";
+  if (/[\u0900-\u097F]/.test(text)) return "hi-IN";
+  if (/[\u0B80-\u0BFF]/.test(text)) return "ta-IN";
+  if (/[\u0C00-\u0C7F]/.test(text)) return "te-IN";
+  return fallback || "en-IN";
+}
+
+async function fetchWithTimeout(url, options = {}, timeoutMs = 30000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -301,194 +572,342 @@ export default function App() {
     {
       role: "assistant",
       content:
-        "Namaste! I am Sahaya AI. Ask me about healthcare, education, finance, public services, nearby places, schemes, or eligibility.",
+        "Namaste! I am Sahaya HealthOS. Ask me about hospitals, symptoms, public support, nearby services, schemes, or hospital navigation.",
     },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [voiceActive, setVoiceActive] = useState(false);
-  const [voiceStatus, setVoiceStatus] = useState("idle");
+  const [autoRead, setAutoRead] = useState(false);
+  const [voiceLang, setVoiceLang] = useState("en-IN");
+  const [speechVoices, setSpeechVoices] = useState([]);
   const [backendStatus, setBackendStatus] = useState("checking");
-  const [liveUserTranscript, setLiveUserTranscript] = useState("");
-  const [liveAssistantTranscript, setLiveAssistantTranscript] = useState("");
-  const [lastVoiceNote, setLastVoiceNote] = useState(
-    "Voice is powered by Vapi. Text chat still uses your backend directly."
-  );
+  const [speechStatus, setSpeechStatus] = useState("Ready to read replies");
+  const [isMobile, setIsMobile] = useState(false);
+  const [activeView, setActiveView] = useState("home");
+  const [dashboard, setDashboard] = useState(null);
+
+  const [voiceConnected, setVoiceConnected] = useState(false);
+  const [voiceConnecting, setVoiceConnecting] = useState(false);
+  const [liveUserTranscript, setLiveUserTranscript] = useState("Waiting for voice input...");
+  const [liveAssistantTranscript, setLiveAssistantTranscript] = useState("Assistant reply will appear here...");
+  const [lastVoiceEvent, setLastVoiceEvent] = useState("Voice ready");
 
   const bottomRef = useRef(null);
   const vapiRef = useRef(null);
-  const handledTranscriptIds = useRef(new Set());
+  const lastFinalUserRef = useRef("");
+  const lastFinalAssistantRef = useRef("");
+
+  const statusStyle = useMemo(
+    () => ({
+      online: styles.statusOnline,
+      offline: styles.statusOffline,
+      waking: styles.statusWaking,
+      checking: styles.statusWaking,
+    }),
+    []
+  );
 
   const statusLabel = {
     online: "Backend online",
     offline: "Backend offline",
     waking: "Waking up server...",
-    checking: "Checking server...",
+    checking: "Checking backend...",
   };
 
-  const statusStyle = {
-    online: styles.statusOnline,
-    offline: styles.statusOffline,
-    waking: styles.statusWaking,
-    checking: styles.statusWaking,
-  };
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 900);
+    };
 
-  const voiceBadge = useMemo(() => {
-    if (voiceActive) return "Vapi voice live";
-    if (voiceStatus === "connecting") return "Connecting voice...";
-    return "Voice ready";
-  }, [voiceActive, voiceStatus]);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading, liveUserTranscript, liveAssistantTranscript]);
+  }, [messages, loading, liveUserTranscript, liveAssistantTranscript, activeView]);
+
+  useEffect(() => {
+    const loadVoices = () => {
+      if ("speechSynthesis" in window) {
+        const voices = window.speechSynthesis.getVoices();
+        setSpeechVoices(voices || []);
+      }
+    };
+
+    loadVoices();
+
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+
+    return () => {
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.onvoiceschanged = null;
+      }
+    };
+  }, []);
+
+  const loadDashboard = async () => {
+    try {
+      const response = await fetchWithTimeout(`${API_BASE}/dashboard`, {}, 15000);
+      if (!response.ok) return;
+      const data = await response.json();
+      setDashboard(data);
+    } catch (error) {
+      console.error("Dashboard fetch failed:", error);
+    }
+  };
 
   useEffect(() => {
     const checkBackend = async () => {
       try {
         setBackendStatus("waking");
-        const response = await fetchWithTimeout(`${API_BASE}/`, {}, 20000);
+        const response = await fetchWithTimeout(`${API_BASE}/`, {}, 15000);
         setBackendStatus(response.ok ? "online" : "offline");
-      } catch (error) {
-        console.error("Backend ping failed:", error);
+      } catch {
         setBackendStatus("offline");
       }
     };
 
     checkBackend();
+    loadDashboard();
+
+    const interval = setInterval(loadDashboard, 4000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
-    console.log("API_BASE:", API_BASE);
-    console.log("VAPI_PUBLIC_KEY:", VAPI_PUBLIC_KEY);
-    console.log("VAPI_ASSISTANT_ID:", VAPI_ASSISTANT_ID);
-  }, []);
+    if (!VAPI_PUBLIC_KEY || !VAPI_ASSISTANT_ID) {
+      setLastVoiceEvent("Voice setup is incomplete. Add Vapi environment values.");
+      return;
+    }
 
-  useEffect(() => {
+    let vapi;
+
     try {
-      if (!VAPI_PUBLIC_KEY || !VAPI_ASSISTANT_ID) {
-        setLastVoiceNote("Vapi credentials are missing.");
-        return;
-      }
-
-      const vapi = new Vapi(VAPI_PUBLIC_KEY);
+      vapi = new Vapi(VAPI_PUBLIC_KEY);
       vapiRef.current = vapi;
-      setLastVoiceNote("Vapi initialized successfully.");
+      setLastVoiceEvent("Voice ready");
 
-      const pushUniqueTranscript = (role, text, idHint) => {
-        const safeText = (text || "").trim();
-        if (!safeText) return;
+      const appendUniqueChatMessage = (role, content) => {
+        const text = String(content || "").trim();
+        if (!text) return;
 
-        const key = `${role}:${idHint || safeText}`;
-        if (handledTranscriptIds.current.has(key)) return;
-        handledTranscriptIds.current.add(key);
-
-        setMessages((prev) => [...prev, { role, content: safeText }]);
+        setMessages((prev) => {
+          const last = prev[prev.length - 1];
+          if (last && last.role === role && last.content.trim() === text) {
+            return prev;
+          }
+          return [...prev, { role, content: text }];
+        });
       };
 
       vapi.on("call-start", () => {
-        setVoiceActive(true);
-        setVoiceStatus("active");
-        setLastVoiceNote("Voice conversation started.");
+        setVoiceConnected(true);
+        setVoiceConnecting(false);
+        setLastVoiceEvent("Listening...");
+        setLiveUserTranscript("Listening...");
+        setLiveAssistantTranscript("Assistant reply will appear here...");
       });
 
       vapi.on("call-end", () => {
-        setVoiceActive(false);
-        setVoiceStatus("idle");
-        setLastVoiceNote("Voice conversation ended.");
-        setLiveUserTranscript("");
-        setLiveAssistantTranscript("");
+        setVoiceConnected(false);
+        setVoiceConnecting(false);
+        setTimeout(() => setLastVoiceEvent("Voice ready"), 500);
       });
 
       vapi.on("speech-start", () => {
-        setLastVoiceNote("Assistant is speaking...");
+        setLastVoiceEvent("Assistant speaking...");
       });
 
       vapi.on("speech-end", () => {
-        setLastVoiceNote("Assistant finished speaking.");
+        setLastVoiceEvent("Voice ready");
       });
 
       vapi.on("message", (msg) => {
         if (!msg) return;
 
-        if (msg.type === "transcript") {
-          const transcriptText = (msg.transcript || "").trim();
-          const transcriptRole = msg.role || "assistant";
+        const type = msg.type || "";
 
-          if (transcriptRole === "user") {
-            setLiveUserTranscript(transcriptText);
-          } else if (transcriptRole === "assistant") {
-            setLiveAssistantTranscript(transcriptText);
+        if (type === "transcript") {
+          const role = msg.role || "assistant";
+          const transcriptText = String(msg.transcript || "").trim();
+          const transcriptType = msg.transcriptType || "";
+
+          if (role === "user") {
+            if (transcriptText) setLiveUserTranscript(transcriptText);
+
+            if (transcriptType === "final" && transcriptText) {
+              setInput(transcriptText);
+              if (lastFinalUserRef.current !== transcriptText) {
+                lastFinalUserRef.current = transcriptText;
+                appendUniqueChatMessage("user", transcriptText);
+                setActiveView("assistant");
+              }
+            }
           }
 
-          if (transcriptText && msg.transcriptType === "final") {
-            pushUniqueTranscript(
-              transcriptRole,
-              transcriptText,
-              msg.timestamp || msg.id || transcriptText
-            );
+          if (role === "assistant") {
+            if (transcriptText) setLiveAssistantTranscript(transcriptText);
+
+            if (transcriptType === "final" && transcriptText) {
+              if (lastFinalAssistantRef.current !== transcriptText) {
+                lastFinalAssistantRef.current = transcriptText;
+                appendUniqueChatMessage("assistant", transcriptText);
+                setActiveView("assistant");
+              }
+            }
           }
+
+          return;
         }
 
-        if (msg.type === "function-call" || msg.type === "tool-calls") {
-          setLastVoiceNote("Assistant is using a tool...");
+        if (type === "conversation-update") {
+          const conversation = msg.conversation || {};
+          const maybeUser =
+            conversation?.transcript?.user ||
+            conversation?.userTranscript ||
+            "";
+          const maybeAssistant =
+            conversation?.transcript?.assistant ||
+            conversation?.assistantTranscript ||
+            "";
+
+          if (String(maybeUser).trim()) {
+            setLiveUserTranscript(String(maybeUser).trim());
+          }
+
+          if (String(maybeAssistant).trim()) {
+            setLiveAssistantTranscript(String(maybeAssistant).trim());
+          }
+
+          return;
+        }
+
+        if (type === "function-call" || type === "tool-calls") {
+          setLastVoiceEvent("Assistant is using tools...");
+          return;
+        }
+
+        if (type === "status-update" && msg.status) {
+          setLastVoiceEvent(String(msg.status));
         }
       });
 
       vapi.on("error", (error) => {
         console.error("Vapi error:", error);
-        setVoiceActive(false);
-        setVoiceStatus("error");
-        setLastVoiceNote("Voice error occurred. Please try again.");
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "assistant",
-            content:
-              "Voice service had an issue. You can still continue using text chat.",
-          },
-        ]);
+        setVoiceConnected(false);
+        setVoiceConnecting(false);
+        setLastVoiceEvent("Voice ready");
       });
-
-      return () => {
-        try {
-          vapi.stop();
-        } catch (e) {
-          console.error("Error stopping Vapi on cleanup:", e);
-        }
-      };
     } catch (error) {
       console.error("Vapi initialization failed:", error);
-      setLastVoiceNote("Vapi initialization failed.");
+      setLastVoiceEvent("Voice ready");
     }
+
+    return () => {
+      try {
+        vapi?.stop();
+      } catch {
+        // ignore cleanup stop errors
+      }
+    };
   }, []);
 
-  const startVapiVoice = async () => {
+  const getBestVoice = (langCode) => {
+    if (!speechVoices?.length) return null;
+
+    return (
+      speechVoices.find((v) => v.lang === langCode) ||
+      speechVoices.find((v) => v.lang?.startsWith(langCode.split("-")[0])) ||
+      speechVoices.find((v) => v.lang === "en-IN") ||
+      speechVoices[0] ||
+      null
+    );
+  };
+
+  const speak = (text) => {
     try {
-      if (!vapiRef.current) {
-        setLastVoiceNote("Vapi is not initialized.");
+      if (!("speechSynthesis" in window)) {
+        setSpeechStatus("Speech synthesis is not supported in this browser.");
         return;
       }
-      setVoiceStatus("connecting");
-      setLastVoiceNote("Connecting to Vapi voice assistant...");
-      handledTranscriptIds.current.clear();
-      await vapiRef.current.start(VAPI_ASSISTANT_ID);
-    } catch (error) {
-      console.error("Failed to start Vapi:", error);
-      setVoiceStatus("error");
-      setVoiceActive(false);
-      setLastVoiceNote("Could not start voice assistant.");
+
+      const cleaned = cleanTextForSpeech(text);
+      if (!cleaned) return;
+
+      window.speechSynthesis.cancel();
+
+      const detectedLang = detectSpeechLang(cleaned, voiceLang);
+      const utterance = new SpeechSynthesisUtterance(cleaned);
+      utterance.lang = detectedLang;
+      utterance.rate = 1;
+
+      const matchedVoice = getBestVoice(detectedLang);
+      if (matchedVoice) {
+        utterance.voice = matchedVoice;
+      }
+
+      utterance.onstart = () => {
+        setSpeechStatus(`Reading in ${detectedLang}`);
+      };
+
+      utterance.onend = () => {
+        setSpeechStatus("Finished reading");
+      };
+
+      utterance.onerror = () => {
+        setSpeechStatus(
+          "This device/browser could not read that language aloud properly."
+        );
+      };
+
+      window.speechSynthesis.speak(utterance);
+    } catch {
+      setSpeechStatus("Could not read the response aloud.");
     }
   };
 
-  const stopVapiVoice = async () => {
+  const stopSpeaking = () => {
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      setSpeechStatus("Reading stopped");
+    }
+  };
+
+  const startVoice = async () => {
+    if (!vapiRef.current) {
+      setLastVoiceEvent("Voice assistant is not ready yet.");
+      return;
+    }
+
+    try {
+      setVoiceConnecting(true);
+      setLastVoiceEvent("Connecting voice...");
+      lastFinalUserRef.current = "";
+      lastFinalAssistantRef.current = "";
+      setLiveUserTranscript("Listening...");
+      setLiveAssistantTranscript("Assistant reply will appear here...");
+      await vapiRef.current.start(VAPI_ASSISTANT_ID);
+      setActiveView("voice");
+    } catch (error) {
+      console.error("Failed to start Vapi:", error);
+      setVoiceConnecting(false);
+      setVoiceConnected(false);
+      setLastVoiceEvent("Voice ready");
+    }
+  };
+
+  const stopVoice = async () => {
     try {
       await vapiRef.current?.stop();
-      setVoiceActive(false);
-      setVoiceStatus("idle");
-      setLastVoiceNote("Voice stopped.");
-    } catch (error) {
-      console.error("Failed to stop Vapi:", error);
+      setVoiceConnected(false);
+      setVoiceConnecting(false);
+      setLastVoiceEvent("Voice ready");
+    } catch {
+      setLastVoiceEvent("Voice ready");
     }
   };
 
@@ -500,17 +919,7 @@ export default function App() {
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setLoading(true);
-
-    if (backendStatus !== "online") {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "system",
-          content:
-            "The server is starting up. The first response may take a little longer.",
-        },
-      ]);
-    }
+    setActiveView("assistant");
 
     try {
       const response = await fetchWithTimeout(
@@ -522,7 +931,7 @@ export default function App() {
           },
           body: JSON.stringify({ query: text }),
         },
-        60000
+        45000
       );
 
       if (!response.ok) {
@@ -533,100 +942,379 @@ export default function App() {
       const assistantText =
         data?.response || "I could not generate a response right now.";
 
-      setMessages((prev) =>
-        prev
-          .filter((m) => m.role !== "system")
-          .concat({ role: "assistant", content: assistantText })
-      );
-
+      setMessages((prev) => [...prev, { role: "assistant", content: assistantText }]);
       setBackendStatus("online");
+      loadDashboard();
+
+      if (autoRead) {
+        setTimeout(() => speak(assistantText), 250);
+      }
     } catch (error) {
-      console.error("Chat request failed:", error);
-      setMessages((prev) =>
-        prev.filter((m) => m.role !== "system").concat({
-          role: "assistant",
-          content:
-            error.name === "AbortError"
-              ? "The request timed out. The server may be starting up — please try again in a moment."
-              : "I could not connect to the backend. Please make sure the backend is live and the API URL is correct.",
-        })
-      );
       setBackendStatus("offline");
+
+      const errorMessage =
+        error.name === "AbortError"
+          ? "Server took too long to respond. Please try again."
+          : "I could not connect to the backend. Please make sure the backend is live and the API URL is correct.";
+
+      setMessages((prev) => [...prev, { role: "assistant", content: errorMessage }]);
     } finally {
       setLoading(false);
     }
   };
 
   const clearChat = () => {
+    stopSpeaking();
     setMessages([
       {
         role: "assistant",
         content:
-          "Namaste! I am Sahaya AI. Ask me about healthcare, education, finance, public services, nearby places, schemes, or eligibility.",
+          "Namaste! I am Sahaya HealthOS. Ask me about hospitals, symptoms, public support, nearby services, schemes, or hospital navigation.",
       },
     ]);
     setInput("");
-    setLiveUserTranscript("");
-    setLiveAssistantTranscript("");
-    setLastVoiceNote("Chat reset complete.");
+    setLiveUserTranscript("Waiting for voice input...");
+    setLiveAssistantTranscript("Assistant reply will appear here...");
+    setLastVoiceEvent("Voice ready");
+    lastFinalUserRef.current = "";
+    lastFinalAssistantRef.current = "";
+    setActiveView("home");
   };
+
+  const voiceBadge = useMemo(() => {
+    if (voiceConnected) return "Voice connected";
+    if (voiceConnecting) return "Connecting voice...";
+    return "Voice ready";
+  }, [voiceConnected, voiceConnecting]);
+
+  const renderHome = () => (
+    <div style={styles.homeHero}>
+      <div style={styles.heroBadge}>Sahaya HealthOS RT</div>
+      <div style={styles.heroTitle}>
+        Real-Time AI Hospital Coordination for patients, staff, and hospital operations.
+      </div>
+      <div style={styles.heroText}>
+        Use multilingual text or voice to triage patients, generate staff summaries,
+        monitor queue pressure, view digital twin insights, and support low-literacy users
+        with clear spoken guidance.
+      </div>
+      <div style={styles.heroActions}>
+        <button style={styles.heroButtonPrimary} onClick={() => setActiveView("assistant")}>
+          Enter Assistant
+        </button>
+        <button style={styles.heroButtonSecondary} onClick={() => setActiveView("dashboard")}>
+          View Operations Dashboard
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderDashboard = () => (
+    <div style={styles.sectionPanel}>
+      <div style={{ ...styles.sectionTitle, marginBottom: 14 }}>Hospital Operations Dashboard</div>
+
+      <div style={styles.statGrid}>
+        <div style={styles.statCard}>
+          <div style={styles.statLabel}>Total Patients</div>
+          <div style={styles.statValue}>{dashboard?.total_patients ?? 0}</div>
+        </div>
+
+        <div style={styles.statCard}>
+          <div style={styles.statLabel}>High Priority</div>
+          <div style={styles.statValue}>{dashboard?.high_priority_cases ?? 0}</div>
+        </div>
+
+        <div style={styles.statCard}>
+          <div style={styles.statLabel}>Medium Priority</div>
+          <div style={styles.statValue}>{dashboard?.medium_priority_cases ?? 0}</div>
+        </div>
+
+        <div style={styles.statCard}>
+          <div style={styles.statLabel}>Low Priority</div>
+          <div style={styles.statValue}>{dashboard?.low_priority_cases ?? 0}</div>
+        </div>
+      </div>
+
+      <div style={{ ...styles.sectionTitle, marginTop: 12 }}>Digital Twin Insight</div>
+      <div style={styles.listCard}>
+        {dashboard?.digital_twin_note || "Waiting for hospital intelligence..."}
+      </div>
+
+      <div style={{ ...styles.sectionTitle, marginTop: 12 }}>Department Load</div>
+      {Object.entries(dashboard?.department_load || {}).map(([key, value]) => (
+        <div key={key} style={styles.listCard}>
+          <strong style={{ textTransform: "capitalize" }}>{key}</strong>: {value}
+        </div>
+      ))}
+
+      <div style={{ ...styles.sectionTitle, marginTop: 12 }}>Queue Preview</div>
+      {(dashboard?.queue_preview || []).length === 0 ? (
+        <div style={styles.listCard}>No patients in the live queue right now.</div>
+      ) : (
+        (dashboard?.queue_preview || []).map((item) => (
+          <div key={item.id} style={styles.listCard}>
+            <div><strong>Patient #{item.id}</strong></div>
+            <div>Urgency: {item.urgency}</div>
+            <div>Department: {item.department}</div>
+            <div>Issue: {item.query}</div>
+          </div>
+        ))
+      )}
+    </div>
+  );
+
+  const renderVoice = () => (
+    <div style={styles.sectionPanel}>
+      <div style={{ ...styles.sectionTitle, marginBottom: 14 }}>Live Voice Control Center</div>
+
+      <div style={{ marginBottom: 14, display: "flex", flexWrap: "wrap" }}>
+        <button
+          style={styles.successButton}
+          onClick={startVoice}
+          disabled={voiceConnected || voiceConnecting}
+        >
+          {voiceConnecting ? "Connecting..." : "🎤 Start Voice"}
+        </button>
+
+        <button
+          style={styles.dangerSoftButton}
+          onClick={stopVoice}
+          disabled={!voiceConnected && !voiceConnecting}
+        >
+          🛑 Stop Voice
+        </button>
+
+        <button style={styles.secondaryButton} onClick={stopSpeaking}>
+          ⏹ Stop Reading
+        </button>
+      </div>
+
+      <div style={{ ...styles.sectionTitle, marginBottom: 8 }}>Live user transcript</div>
+      <div style={styles.transcriptCard}>{liveUserTranscript}</div>
+
+      <div style={{ ...styles.sectionTitle, marginTop: 14, marginBottom: 8 }}>Live assistant transcript</div>
+      <div style={styles.transcriptCard}>{liveAssistantTranscript}</div>
+
+      <div style={{ ...styles.sectionTitle, marginTop: 14, marginBottom: 8 }}>Voice status</div>
+      <div style={styles.transcriptCard}>{lastVoiceEvent}</div>
+    </div>
+  );
+
+  const renderAssistant = () => (
+    <>
+      <div style={isMobile ? styles.chatMobile : styles.chat}>
+        {messages.map((message, index) => {
+          const mapLinks =
+            message.role === "assistant"
+              ? extractMapLinks(message.content)
+              : [];
+
+          return (
+            <div
+              key={index}
+              style={
+                message.role === "user"
+                  ? styles.bubbleWrapUser
+                  : styles.bubbleWrapBot
+              }
+            >
+              <div
+                style={
+                  message.role === "user"
+                    ? isMobile
+                      ? styles.bubbleUserMobile
+                      : styles.bubbleUser
+                    : isMobile
+                    ? styles.bubbleBotMobile
+                    : styles.bubbleBot
+                }
+              >
+                {message.content}
+
+                {message.role === "assistant" && (
+                  <div style={styles.answerActions}>
+                    <button
+                      style={styles.readButton}
+                      onClick={() => speak(message.content)}
+                    >
+                      🔊 Read Answer
+                    </button>
+
+                    <button
+                      style={styles.stopButton}
+                      onClick={stopSpeaking}
+                    >
+                      ⏹ Stop Reading
+                    </button>
+
+                    {mapLinks.map((link, idx) => (
+                      <a
+                        key={idx}
+                        href={link}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{ textDecoration: "none" }}
+                      >
+                        <button style={styles.secondaryButton}>
+                          📍 Open Map {idx + 1}
+                        </button>
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+
+        {loading && (
+          <div style={styles.bubbleWrapBot}>
+            <div style={isMobile ? styles.bubbleBotMobile : styles.bubbleBot}>
+              Sahaya HealthOS is thinking...
+            </div>
+          </div>
+        )}
+
+        <div ref={bottomRef} />
+      </div>
+
+      <div style={isMobile ? styles.controlsMobile : styles.controls}>
+        <div style={isMobile ? styles.inputRowMobile : styles.inputRow}>
+          <input
+            style={styles.input}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                sendMessage();
+              }
+            }}
+            placeholder="Describe symptoms, hospital need, or public support issue..."
+          />
+          <button
+            style={styles.button}
+            onClick={() => sendMessage()}
+            disabled={loading || !input.trim()}
+          >
+            Send
+          </button>
+        </div>
+
+        <div style={styles.footerRow}>
+          <button
+            style={styles.secondaryButton}
+            onClick={() => input && speak(input)}
+          >
+            🔊 Read Draft
+          </button>
+
+          <button
+            style={styles.secondaryButton}
+            onClick={stopSpeaking}
+          >
+            ⏹ Stop Draft/Answer Reading
+          </button>
+
+          <button
+            style={styles.secondaryButton}
+            onClick={() =>
+              sendMessage("I am a low income student and need scholarship help")
+            }
+          >
+            Try Scholarship Demo
+          </button>
+
+          <button
+            style={styles.secondaryButton}
+            onClick={() => sendMessage("I need hospital help near Bangalore")}
+          >
+            Try Hospital Demo
+          </button>
+
+          <button
+            style={styles.secondaryButton}
+            onClick={() => sendMessage("I have chest pain and dizziness")}
+          >
+            Try Emergency Triage
+          </button>
+        </div>
+      </div>
+    </>
+  );
 
   return (
     <div style={styles.app}>
-      <div style={styles.shell}>
-        <aside style={styles.sidebar}>
-          <div style={styles.brandWrap}>
-            <div style={styles.title}>Sahaya AI</div>
+      <div style={isMobile ? styles.shellMobile : styles.shellDesktop}>
+        <aside style={isMobile ? styles.sidebarMobile : styles.sidebar}>
+          <div style={styles.brand}>
+            <div style={styles.title}>Sahaya HealthOS</div>
             <div style={styles.subtitle}>
-              Multilingual government assistance assistant for healthcare,
-              education, finance, public services, schemes, rewards, nearby help,
-              and live voice conversations.
+              Premium real-time hospital coordination for patients, staff,
+              hospital operations, and low-literacy users with multilingual AI assistance.
             </div>
           </div>
 
-          <div style={styles.statusRow}>
-            <div style={{ ...styles.statusBar, ...statusStyle[backendStatus] }}>
-              <span
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: "50%",
-                  background:
-                    backendStatus === "online"
-                      ? "#16a34a"
-                      : backendStatus === "offline"
-                      ? "#dc2626"
-                      : "#ca8a04",
-                  display: "inline-block",
-                }}
-              />
-              {statusLabel[backendStatus]}
-            </div>
+          <div style={styles.card}>
+            <div style={styles.sectionTitle}>System Status</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+              <div style={{ ...styles.statusBar, ...statusStyle[backendStatus] }}>
+                <span
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: "50%",
+                    background:
+                      backendStatus === "online"
+                        ? "#16a34a"
+                        : backendStatus === "offline"
+                        ? "#dc2626"
+                        : "#ca8a04",
+                    display: "inline-block",
+                  }}
+                />
+                {statusLabel[backendStatus]}
+              </div>
 
-            <div style={{ ...styles.statusBar, ...styles.statusWaking }}>
-              <span
+              <div
                 style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: "50%",
-                  background: voiceActive ? "#2563eb" : "#ca8a04",
-                  display: "inline-block",
+                  ...styles.statusBar,
+                  ...(voiceConnected
+                    ? styles.statusOnline
+                    : voiceConnecting
+                    ? styles.statusWaking
+                    : styles.statusNeutral),
                 }}
-              />
-              {voiceBadge}
+              >
+                <span
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: "50%",
+                    background: voiceConnected
+                      ? "#16a34a"
+                      : voiceConnecting
+                      ? "#ca8a04"
+                      : "#2563eb",
+                    display: "inline-block",
+                  }}
+                />
+                {voiceBadge}
+              </div>
             </div>
           </div>
 
           <div>
             <div style={styles.sectionTitle}>Capabilities</div>
-            <div style={styles.capabilities}>
+            <div style={styles.pillWrap}>
               {[
-                "Government schemes",
-                "Eligibility guidance",
-                "Nearby places",
-                "Rewards and badges",
-                "Text + voice support",
-                "Multilingual assistance",
+                "AI triage",
+                "Live queue",
+                "Staff assist",
+                "Digital twin",
+                "Voice support",
+                "Low literacy mode",
+                "Nearby routing",
+                "Scheme guidance",
               ].map((item) => (
                 <span key={item} style={styles.pill}>
                   {item}
@@ -636,213 +1324,125 @@ export default function App() {
           </div>
 
           <div>
-            <div style={styles.sectionTitle}>Quick prompts</div>
+            <div style={styles.sectionTitle}>Quick Actions</div>
 
             <button
               style={styles.quickButton}
-              onClick={() => sendMessage("I need hospital help near Bangalore")}
+              onClick={() => {
+                setActiveView("assistant");
+                sendMessage("I need hospital help near Bangalore");
+              }}
             >
               Healthcare Help
             </button>
 
             <button
               style={styles.quickButton}
-              onClick={() =>
-                sendMessage("I am a low income student and need scholarship help")
-              }
+              onClick={() => {
+                setActiveView("assistant");
+                sendMessage("I have chest pain and breathing problem");
+              }}
+            >
+              Emergency Triage
+            </button>
+
+            <button
+              style={styles.quickButton}
+              onClick={() => {
+                setActiveView("assistant");
+                sendMessage("I am a low income student and need scholarship help");
+              }}
             >
               Education Scheme
             </button>
 
             <button
               style={styles.quickButton}
-              onClick={() => sendMessage("How can I open a bank account?")}
+              onClick={() => setActiveView("dashboard")}
             >
-              Finance Support
-            </button>
-
-            <button
-              style={styles.quickButton}
-              onClick={() => sendMessage("Where is the nearest ration office?")}
-            >
-              Public Services
+              View Operations Dashboard
             </button>
           </div>
 
-          <div>
-            <div style={styles.sectionTitle}>Voice controls</div>
-            <div style={styles.small}>
-              Voice input and voice output are handled by Vapi instead of the browser.
-            </div>
+          <div style={styles.card}>
+            <div style={styles.sectionTitle}>Voice Settings</div>
 
-            <div style={{ marginTop: 12, display: "flex", gap: "8px", flexWrap: "wrap" }}>
-              <button
-                style={styles.primaryVoiceButton}
-                onClick={startVapiVoice}
-                disabled={voiceActive || voiceStatus === "connecting"}
+            <label style={styles.small}>
+              <input
+                type="checkbox"
+                checked={autoRead}
+                onChange={(e) => setAutoRead(e.target.checked)}
+                style={{ marginRight: 8 }}
+              />
+              Auto read text responses
+            </label>
+
+            <div style={{ marginTop: 12 }}>
+              <select
+                value={voiceLang}
+                onChange={(e) => setVoiceLang(e.target.value)}
+                style={styles.select}
               >
-                {voiceStatus === "connecting" ? "Connecting..." : "🎤 Start Voice"}
-              </button>
-
-              <button
-                style={styles.dangerButton}
-                onClick={stopVapiVoice}
-                disabled={!voiceActive && voiceStatus !== "connecting"}
-              >
-                🛑 Stop Voice
-              </button>
-            </div>
-
-            <div style={styles.transcriptBox}>
-              <div style={styles.transcriptLabel}>Voice status</div>
-              <div style={styles.transcriptText}>{lastVoiceNote}</div>
-            </div>
-
-            <div style={styles.transcriptBox}>
-              <div style={styles.transcriptLabel}>Live user transcript</div>
-              <div style={styles.transcriptText}>
-                {liveUserTranscript || "Waiting for voice input..."}
-              </div>
-            </div>
-
-            <div style={styles.transcriptBox}>
-              <div style={styles.transcriptLabel}>Live assistant transcript</div>
-              <div style={styles.transcriptText}>
-                {liveAssistantTranscript || "Assistant reply will appear here..."}
-              </div>
+                <option value="en-IN">English (India)</option>
+                <option value="hi-IN">Hindi</option>
+                <option value="kn-IN">Kannada</option>
+                <option value="ta-IN">Tamil</option>
+                <option value="te-IN">Telugu</option>
+              </select>
             </div>
           </div>
 
           <div>
             <button style={styles.secondaryButton} onClick={clearChat}>
-              Reset Chat
+              Reset System
             </button>
           </div>
         </aside>
 
         <main style={styles.main}>
-          <div style={styles.topBar}>
-            <div style={styles.topTitle}>Citizen Support Workspace</div>
+          <div style={isMobile ? styles.topBarMobile : styles.topBar}>
+            <div style={styles.topTitle}>Sahaya HealthOS RT</div>
             <div style={styles.topSubtitle}>
-              Ask Sahaya about schemes, eligibility, hospitals, banks, police, ration offices, and more.
-              Use text chat or talk directly with the voice assistant.
+              Real-time AI hospital coordination with patient triage, department routing,
+              queue balancing, staff summaries, live communication, and operations intelligence.
             </div>
 
-            <div style={styles.voiceCard}>
-              <div style={{ fontSize: 15, fontWeight: 800, marginBottom: 6 }}>
-                Voice mode
-              </div>
-              <div style={styles.topSubtitle}>
-                Start a live call for multilingual speech input and spoken responses.
-                Text chat remains available below.
-              </div>
-            </div>
-          </div>
-
-          <div style={styles.chat}>
-            {messages.map((message, index) => {
-              if (message.role === "system") {
-                return (
-                  <div key={index} style={styles.bubbleWrapBot}>
-                    <div style={styles.bubbleSystem}>{message.content}</div>
-                  </div>
-                );
-              }
-
-              const mapLinks =
-                message.role === "assistant"
-                  ? extractMapLinks(message.content)
-                  : [];
-
-              return (
-                <div
-                  key={index}
-                  style={
-                    message.role === "user"
-                      ? styles.bubbleWrapUser
-                      : styles.bubbleWrapBot
-                  }
-                >
-                  <div
-                    style={
-                      message.role === "user"
-                        ? styles.bubbleUser
-                        : styles.bubbleBot
-                    }
-                  >
-                    {message.content}
-
-                    {message.role === "assistant" && mapLinks.length > 0 && (
-                      <div style={{ marginTop: 12, display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                        {mapLinks.map((link, idx) => (
-                          <a
-                            key={idx}
-                            href={link}
-                            target="_blank"
-                            rel="noreferrer"
-                            style={{ textDecoration: "none" }}
-                          >
-                            <button style={styles.secondaryButton}>
-                              📍 Open Map {idx + 1}
-                            </button>
-                          </a>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-
-            {loading && (
-              <div style={styles.bubbleWrapBot}>
-                <div style={styles.bubbleBot}>Sahaya is thinking...</div>
-              </div>
-            )}
-
-            <div ref={bottomRef} />
-          </div>
-
-          <div style={styles.controls}>
-            <div style={styles.inputRow}>
-              <input
-                style={styles.input}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    sendMessage();
-                  }
-                }}
-                placeholder="Message Sahaya AI..."
-              />
+            <div style={styles.navTabs}>
               <button
-                style={styles.sendButton}
-                onClick={() => sendMessage()}
-                disabled={loading || !input.trim()}
+                style={activeView === "home" ? styles.navTabActive : styles.navTab}
+                onClick={() => setActiveView("home")}
               >
-                Send
+                Home
               </button>
-            </div>
-
-            <div style={styles.footerRow}>
               <button
-                style={styles.secondaryButton}
-                onClick={() =>
-                  sendMessage("I am a low income student and need scholarship help")
-                }
+                style={activeView === "assistant" ? styles.navTabActive : styles.navTab}
+                onClick={() => setActiveView("assistant")}
               >
-                Try Scholarship Demo
+                Assistant
               </button>
-
               <button
-                style={styles.secondaryButton}
-                onClick={() => sendMessage("I need hospital help near Bangalore")}
+                style={activeView === "voice" ? styles.navTabActive : styles.navTab}
+                onClick={() => setActiveView("voice")}
               >
-                Try Hospital Demo
+                Voice
+              </button>
+              <button
+                style={activeView === "dashboard" ? styles.navTabActive : styles.navTab}
+                onClick={() => setActiveView("dashboard")}
+              >
+                Dashboard
               </button>
             </div>
           </div>
+
+          {activeView === "home" && renderHome()}
+          {activeView === "assistant" && renderAssistant()}
+          {activeView === "voice" && (
+            <div style={isMobile ? styles.chatMobile : styles.chat}>{renderVoice()}</div>
+          )}
+          {activeView === "dashboard" && (
+            <div style={isMobile ? styles.chatMobile : styles.chat}>{renderDashboard()}</div>
+          )}
         </main>
       </div>
     </div>
