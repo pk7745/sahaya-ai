@@ -4,23 +4,60 @@ import Vapi from "@vapi-ai/web";
 const API_BASE =
   import.meta.env.VITE_API_BASE || "https://sahaya-ai-3ss2.onrender.com";
 
-const VAPI_PUBLIC_KEY = import.meta.env.VITE_VAPI_PUBLIC_KEY || "";
-const VAPI_ASSISTANT_ID = import.meta.env.VITE_VAPI_ASSISTANT_ID || "";
+const VAPI_PUBLIC_KEY =
+  import.meta.env.VITE_VAPI_PUBLIC_KEY || "";
+
+const VAPI_ASSISTANT_ID =
+  import.meta.env.VITE_VAPI_ASSISTANT_ID || "";
+
+const DEPARTMENT_CARDS = [
+  {
+    title: "Hospital Care",
+    subtitle: "Triage, emergency routing, hospital navigation, and live patient support.",
+    image:
+      "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
+    action: "assistant",
+    quickPrompt: "I need hospital help near Bangalore",
+  },
+  {
+    title: "Education Support",
+    subtitle: "Scholarships, student assistance, and learning guidance in simple language.",
+    image:
+      "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1200&q=80",
+    action: "assistant",
+    quickPrompt: "I am a low income student and need scholarship help",
+  },
+  {
+    title: "Public Services",
+    subtitle: "Ration cards, certificates, local offices, police, and civic help.",
+    image:
+      "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1200&q=80",
+    action: "assistant",
+    quickPrompt: "Where is the nearest ration office?",
+  },
+  {
+    title: "Finance & Schemes",
+    subtitle: "Banking support, financial literacy, pensions, and government schemes.",
+    image:
+      "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1200&q=80",
+    action: "assistant",
+    quickPrompt: "How can I open a zero balance bank account?",
+  },
+];
 
 const styles = {
   app: {
     minHeight: "100vh",
-    background:
-      "linear-gradient(180deg, #f8fafc 0%, #f3f4f6 45%, #eef2ff 100%)",
+    background: "linear-gradient(180deg, #06101c 0%, #091528 32%, #0c1930 100%)",
     fontFamily:
       'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-    color: "#111827",
+    color: "#e5eefc",
     width: "100%",
     overflowX: "hidden",
   },
   shellDesktop: {
     display: "grid",
-    gridTemplateColumns: "320px minmax(0, 1fr)",
+    gridTemplateColumns: "340px minmax(0, 1fr)",
     minHeight: "100vh",
     width: "100%",
     maxWidth: "100vw",
@@ -35,20 +72,20 @@ const styles = {
     overflowX: "hidden",
   },
   sidebar: {
-    background: "rgba(255,255,255,0.9)",
-    backdropFilter: "blur(14px)",
-    borderRight: "1px solid rgba(226,232,240,0.9)",
-    padding: "20px",
+    background: "rgba(7,16,31,0.88)",
+    backdropFilter: "blur(16px)",
+    borderRight: "1px solid rgba(148,163,184,0.12)",
+    padding: "22px",
     display: "flex",
     flexDirection: "column",
     gap: "18px",
     minWidth: 0,
-    boxShadow: "10px 0 30px rgba(15,23,42,0.04)",
+    boxShadow: "18px 0 40px rgba(0,0,0,0.22)",
   },
   sidebarMobile: {
-    background: "rgba(255,255,255,0.92)",
-    backdropFilter: "blur(14px)",
-    borderBottom: "1px solid rgba(226,232,240,0.9)",
+    background: "rgba(7,16,31,0.92)",
+    backdropFilter: "blur(16px)",
+    borderBottom: "1px solid rgba(148,163,184,0.12)",
     padding: "16px",
     display: "flex",
     flexDirection: "column",
@@ -57,27 +94,27 @@ const styles = {
   },
   brand: {
     paddingBottom: "14px",
-    borderBottom: "1px solid #e2e8f0",
+    borderBottom: "1px solid rgba(148,163,184,0.14)",
   },
   title: {
-    fontSize: "31px",
+    fontSize: "32px",
     fontWeight: "900",
     marginBottom: "8px",
     letterSpacing: "-0.04em",
-    color: "#0f172a",
+    color: "#f8fbff",
   },
   subtitle: {
     fontSize: "13.5px",
-    color: "#64748b",
-    lineHeight: 1.65,
+    color: "#93a5bf",
+    lineHeight: 1.7,
   },
   sectionTitle: {
-    fontSize: "13px",
+    fontSize: "12px",
     fontWeight: "900",
     marginBottom: "10px",
-    color: "#0f172a",
+    color: "#dbeafe",
     textTransform: "uppercase",
-    letterSpacing: "0.06em",
+    letterSpacing: "0.1em",
   },
   pillWrap: {
     display: "flex",
@@ -85,30 +122,28 @@ const styles = {
     gap: "8px",
   },
   pill: {
-    background: "#ffffff",
-    border: "1px solid #dbeafe",
-    color: "#334155",
+    background: "rgba(59,130,246,0.10)",
+    border: "1px solid rgba(96,165,250,0.20)",
+    color: "#dbeafe",
     padding: "7px 11px",
     borderRadius: "999px",
     fontSize: "12px",
     fontWeight: "700",
-    boxShadow: "0 2px 10px rgba(37,99,235,0.05)",
   },
   card: {
-    background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
-    border: "1px solid #e5e7eb",
-    borderRadius: "18px",
+    background: "linear-gradient(180deg, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0.82) 100%)",
+    border: "1px solid rgba(148,163,184,0.16)",
+    borderRadius: "20px",
     padding: "14px",
-    boxShadow: "0 8px 24px rgba(15,23,42,0.05)",
+    boxShadow: "0 14px 30px rgba(0,0,0,0.20)",
   },
   transcriptCard: {
-    background: "#ffffff",
-    border: "1px solid #e5e7eb",
+    background: "rgba(15,23,42,0.82)",
+    border: "1px solid rgba(148,163,184,0.14)",
     borderRadius: "14px",
     padding: "12px 13px",
-    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.4)",
     fontSize: "13px",
-    color: "#111827",
+    color: "#e2e8f0",
     lineHeight: 1.6,
     minHeight: "52px",
     whiteSpace: "pre-wrap",
@@ -119,43 +154,41 @@ const styles = {
     textAlign: "left",
     padding: "13px 14px",
     borderRadius: "16px",
-    border: "1px solid #e5e7eb",
-    background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
+    border: "1px solid rgba(148,163,184,0.16)",
+    background: "linear-gradient(180deg, rgba(30,41,59,0.90) 0%, rgba(15,23,42,0.95) 100%)",
     cursor: "pointer",
     marginBottom: "10px",
     fontSize: "14px",
     fontWeight: "700",
-    color: "#0f172a",
-    boxShadow: "0 4px 14px rgba(15,23,42,0.04)",
+    color: "#f8fbff",
   },
   small: {
     fontSize: "13px",
-    color: "#64748b",
+    color: "#9fb0c8",
     lineHeight: 1.6,
   },
   select: {
     width: "100%",
     padding: "12px 14px",
     borderRadius: "14px",
-    border: "1px solid #d1d5db",
+    border: "1px solid rgba(148,163,184,0.18)",
     fontSize: "14px",
-    background: "#fff",
+    background: "#0f172a",
+    color: "#e5eefc",
     outline: "none",
     boxSizing: "border-box",
-    boxShadow: "0 2px 8px rgba(15,23,42,0.03)",
   },
   secondaryButton: {
     padding: "10px 14px",
     borderRadius: "14px",
-    border: "1px solid #d1d5db",
-    background: "#ffffff",
-    color: "#111827",
+    border: "1px solid rgba(148,163,184,0.18)",
+    background: "rgba(15,23,42,0.85)",
+    color: "#e5eefc",
     cursor: "pointer",
     fontSize: "14px",
     fontWeight: "700",
     marginRight: "8px",
     marginTop: "8px",
-    boxShadow: "0 3px 12px rgba(15,23,42,0.04)",
   },
   successButton: {
     padding: "10px 14px",
@@ -168,14 +201,14 @@ const styles = {
     fontWeight: "800",
     marginRight: "8px",
     marginTop: "8px",
-    boxShadow: "0 8px 18px rgba(34,197,94,0.22)",
+    boxShadow: "0 10px 22px rgba(34,197,94,0.25)",
   },
   dangerSoftButton: {
     padding: "10px 14px",
     borderRadius: "14px",
-    border: "1px solid #fecaca",
-    background: "linear-gradient(180deg, #fff1f2 0%, #ffe4e6 100%)",
-    color: "#991b1b",
+    border: "1px solid rgba(254,202,202,0.24)",
+    background: "linear-gradient(180deg, rgba(127,29,29,0.30) 0%, rgba(153,27,27,0.18) 100%)",
+    color: "#fecaca",
     cursor: "pointer",
     fontSize: "14px",
     fontWeight: "800",
@@ -191,7 +224,6 @@ const styles = {
     cursor: "pointer",
     fontSize: "14px",
     fontWeight: "800",
-    boxShadow: "0 8px 18px rgba(37,99,235,0.25)",
   },
   stopButton: {
     padding: "11px 18px",
@@ -202,7 +234,6 @@ const styles = {
     cursor: "pointer",
     fontSize: "14px",
     fontWeight: "800",
-    boxShadow: "0 8px 18px rgba(220,38,38,0.22)",
   },
   main: {
     display: "flex",
@@ -213,15 +244,15 @@ const styles = {
     width: "100%",
   },
   topBar: {
-    padding: "20px 26px",
-    borderBottom: "1px solid rgba(226,232,240,0.9)",
-    background: "rgba(255,255,255,0.7)",
+    padding: "22px 28px",
+    borderBottom: "1px solid rgba(148,163,184,0.12)",
+    background: "rgba(6,14,28,0.65)",
     backdropFilter: "blur(14px)",
   },
   topBarMobile: {
     padding: "16px",
-    borderBottom: "1px solid rgba(226,232,240,0.9)",
-    background: "rgba(255,255,255,0.76)",
+    borderBottom: "1px solid rgba(148,163,184,0.12)",
+    background: "rgba(6,14,28,0.70)",
     backdropFilter: "blur(14px)",
   },
   topTitle: {
@@ -229,18 +260,12 @@ const styles = {
     fontWeight: "900",
     marginBottom: "6px",
     letterSpacing: "-0.04em",
-    color: "#0f172a",
+    color: "#f8fbff",
   },
   topSubtitle: {
     fontSize: "14px",
-    color: "#64748b",
+    color: "#9fb0c8",
     lineHeight: 1.6,
-  },
-  statusRow: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: "8px",
-    marginTop: "12px",
   },
   statusBar: {
     fontSize: "12px",
@@ -252,24 +277,50 @@ const styles = {
     fontWeight: "800",
   },
   statusOnline: {
-    background: "#dcfce7",
-    color: "#166534",
-    border: "1px solid #bbf7d0",
+    background: "rgba(34,197,94,0.15)",
+    color: "#86efac",
+    border: "1px solid rgba(34,197,94,0.24)",
   },
   statusOffline: {
-    background: "#fee2e2",
-    color: "#991b1b",
-    border: "1px solid #fecaca",
+    background: "rgba(239,68,68,0.14)",
+    color: "#fca5a5",
+    border: "1px solid rgba(239,68,68,0.24)",
   },
   statusWaking: {
-    background: "#fef3c7",
-    color: "#92400e",
-    border: "1px solid #fde68a",
+    background: "rgba(245,158,11,0.14)",
+    color: "#fcd34d",
+    border: "1px solid rgba(245,158,11,0.24)",
   },
   statusNeutral: {
-    background: "#eff6ff",
-    color: "#1d4ed8",
-    border: "1px solid #bfdbfe",
+    background: "rgba(59,130,246,0.14)",
+    color: "#93c5fd",
+    border: "1px solid rgba(59,130,246,0.24)",
+  },
+  navTabs: {
+    display: "flex",
+    gap: "10px",
+    flexWrap: "wrap",
+    marginTop: "16px",
+  },
+  navTab: {
+    padding: "10px 14px",
+    borderRadius: "14px",
+    border: "1px solid rgba(148,163,184,0.16)",
+    background: "rgba(15,23,42,0.72)",
+    color: "#dbeafe",
+    cursor: "pointer",
+    fontWeight: "700",
+    fontSize: "14px",
+  },
+  navTabActive: {
+    padding: "10px 14px",
+    borderRadius: "14px",
+    border: "1px solid rgba(96,165,250,0.22)",
+    background: "linear-gradient(180deg, rgba(37,99,235,0.32) 0%, rgba(30,64,175,0.32) 100%)",
+    color: "#ffffff",
+    cursor: "pointer",
+    fontWeight: "800",
+    fontSize: "14px",
   },
   chat: {
     flex: 1,
@@ -279,7 +330,7 @@ const styles = {
     flexDirection: "column",
     gap: "18px",
     background:
-      "radial-gradient(circle at top, rgba(59,130,246,0.04), transparent 28%)",
+      "radial-gradient(circle at top, rgba(59,130,246,0.08), transparent 26%)",
     minWidth: 0,
   },
   chatMobile: {
@@ -290,7 +341,7 @@ const styles = {
     flexDirection: "column",
     gap: "16px",
     background:
-      "radial-gradient(circle at top, rgba(59,130,246,0.04), transparent 28%)",
+      "radial-gradient(circle at top, rgba(59,130,246,0.08), transparent 26%)",
     minWidth: 0,
   },
   bubbleWrapUser: {
@@ -303,7 +354,7 @@ const styles = {
   },
   bubbleUser: {
     maxWidth: "78%",
-    background: "linear-gradient(180deg, #0f172a 0%, #111827 100%)",
+    background: "linear-gradient(180deg, #1d4ed8 0%, #1e3a8a 100%)",
     color: "#fff",
     padding: "16px 18px",
     borderRadius: "22px 22px 8px 22px",
@@ -311,11 +362,11 @@ const styles = {
     lineHeight: 1.75,
     fontSize: "15px",
     wordBreak: "break-word",
-    boxShadow: "0 12px 28px rgba(15,23,42,0.16)",
+    boxShadow: "0 14px 30px rgba(30,64,175,0.24)",
   },
   bubbleUserMobile: {
     maxWidth: "92%",
-    background: "linear-gradient(180deg, #0f172a 0%, #111827 100%)",
+    background: "linear-gradient(180deg, #1d4ed8 0%, #1e3a8a 100%)",
     color: "#fff",
     padding: "14px 16px",
     borderRadius: "20px 20px 8px 20px",
@@ -323,33 +374,31 @@ const styles = {
     lineHeight: 1.7,
     fontSize: "14px",
     wordBreak: "break-word",
-    boxShadow: "0 10px 24px rgba(15,23,42,0.14)",
   },
   bubbleBot: {
     maxWidth: "78%",
-    background: "rgba(255,255,255,0.92)",
-    color: "#111827",
+    background: "rgba(15,23,42,0.88)",
+    color: "#e5eefc",
     padding: "16px 18px",
     borderRadius: "22px 22px 22px 8px",
-    border: "1px solid #e5e7eb",
+    border: "1px solid rgba(148,163,184,0.14)",
     whiteSpace: "pre-wrap",
     lineHeight: 1.75,
     fontSize: "15px",
     wordBreak: "break-word",
-    boxShadow: "0 10px 28px rgba(15,23,42,0.06)",
+    boxShadow: "0 12px 26px rgba(0,0,0,0.18)",
   },
   bubbleBotMobile: {
     maxWidth: "92%",
-    background: "rgba(255,255,255,0.95)",
-    color: "#111827",
+    background: "rgba(15,23,42,0.92)",
+    color: "#e5eefc",
     padding: "14px 16px",
     borderRadius: "20px 20px 20px 8px",
-    border: "1px solid #e5e7eb",
+    border: "1px solid rgba(148,163,184,0.14)",
     whiteSpace: "pre-wrap",
     lineHeight: 1.7,
     fontSize: "14px",
     wordBreak: "break-word",
-    boxShadow: "0 8px 20px rgba(15,23,42,0.06)",
   },
   answerActions: {
     marginTop: "14px",
@@ -360,14 +409,14 @@ const styles = {
   },
   controls: {
     padding: "18px 24px 24px",
-    borderTop: "1px solid rgba(226,232,240,0.9)",
-    background: "rgba(255,255,255,0.82)",
+    borderTop: "1px solid rgba(148,163,184,0.12)",
+    background: "rgba(6,14,28,0.72)",
     backdropFilter: "blur(14px)",
   },
   controlsMobile: {
     padding: "16px",
-    borderTop: "1px solid rgba(226,232,240,0.9)",
-    background: "rgba(255,255,255,0.84)",
+    borderTop: "1px solid rgba(148,163,184,0.12)",
+    background: "rgba(6,14,28,0.76)",
     backdropFilter: "blur(14px)",
   },
   inputRow: {
@@ -385,29 +434,228 @@ const styles = {
     flex: 1,
     padding: "16px 18px",
     borderRadius: "18px",
-    border: "1px solid #d1d5db",
+    border: "1px solid rgba(148,163,184,0.16)",
     fontSize: "15px",
     outline: "none",
-    background: "#fff",
+    background: "rgba(15,23,42,0.88)",
+    color: "#f8fbff",
     minWidth: 0,
     boxSizing: "border-box",
-    boxShadow: "0 8px 22px rgba(15,23,42,0.05)",
   },
   button: {
     padding: "14px 20px",
     borderRadius: "18px",
     border: "none",
-    background: "linear-gradient(180deg, #111827 0%, #0f172a 100%)",
+    background: "linear-gradient(180deg, #3b82f6 0%, #2563eb 100%)",
     color: "#fff",
     cursor: "pointer",
     fontSize: "14px",
     fontWeight: "800",
-    boxShadow: "0 10px 22px rgba(15,23,42,0.16)",
+    boxShadow: "0 12px 24px rgba(37,99,235,0.24)",
   },
   footerRow: {
     display: "flex",
     flexWrap: "wrap",
     gap: "8px",
+  },
+  sectionPanel: {
+    background: "rgba(15,23,42,0.72)",
+    border: "1px solid rgba(148,163,184,0.14)",
+    borderRadius: "22px",
+    padding: "18px",
+    boxShadow: "0 14px 28px rgba(0,0,0,0.16)",
+  },
+  statGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+    gap: "14px",
+    marginBottom: "18px",
+  },
+  statCard: {
+    background: "linear-gradient(180deg, rgba(30,41,59,0.92) 0%, rgba(15,23,42,0.92) 100%)",
+    border: "1px solid rgba(148,163,184,0.14)",
+    borderRadius: "18px",
+    padding: "16px",
+  },
+  statLabel: {
+    fontSize: "12px",
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
+    color: "#93a5bf",
+    marginBottom: "6px",
+    fontWeight: "800",
+  },
+  statValue: {
+    fontSize: "26px",
+    fontWeight: "900",
+    color: "#f8fbff",
+  },
+  listCard: {
+    background: "rgba(15,23,42,0.88)",
+    border: "1px solid rgba(148,163,184,0.14)",
+    borderRadius: "16px",
+    padding: "14px",
+    marginBottom: "10px",
+    color: "#e5eefc",
+  },
+
+  // START PAGE GRAPHICS
+  startPageWrap: {
+    padding: "32px 28px 40px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "28px",
+  },
+  heroGraphic: {
+    position: "relative",
+    overflow: "hidden",
+    borderRadius: "28px",
+    minHeight: "320px",
+    background:
+      "linear-gradient(135deg, rgba(37,99,235,0.28) 0%, rgba(14,165,233,0.20) 35%, rgba(15,23,42,0.75) 100%)",
+    border: "1px solid rgba(148,163,184,0.14)",
+    boxShadow: "0 22px 48px rgba(0,0,0,0.24)",
+    padding: "34px",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+  },
+  heroGraphicGlow: {
+    position: "absolute",
+    width: "420px",
+    height: "420px",
+    right: "-80px",
+    top: "-100px",
+    borderRadius: "999px",
+    background: "radial-gradient(circle, rgba(59,130,246,0.24) 0%, rgba(59,130,246,0.02) 70%, transparent 100%)",
+    pointerEvents: "none",
+  },
+  heroGraphicGlow2: {
+    position: "absolute",
+    width: "320px",
+    height: "320px",
+    left: "-80px",
+    bottom: "-100px",
+    borderRadius: "999px",
+    background: "radial-gradient(circle, rgba(16,185,129,0.16) 0%, rgba(16,185,129,0.02) 70%, transparent 100%)",
+    pointerEvents: "none",
+  },
+  heroMiniBadge: {
+    display: "inline-flex",
+    alignItems: "center",
+    width: "fit-content",
+    gap: "8px",
+    padding: "9px 14px",
+    borderRadius: "999px",
+    background: "rgba(15,23,42,0.62)",
+    border: "1px solid rgba(148,163,184,0.14)",
+    color: "#bfdbfe",
+    fontWeight: "800",
+    fontSize: "12px",
+    marginBottom: "18px",
+    textTransform: "uppercase",
+    letterSpacing: "0.08em",
+  },
+  heroBigTitle: {
+    fontSize: "52px",
+    lineHeight: 1.02,
+    letterSpacing: "-0.05em",
+    fontWeight: "950",
+    color: "#ffffff",
+    maxWidth: "820px",
+    marginBottom: "14px",
+    position: "relative",
+    zIndex: 1,
+  },
+  heroBigText: {
+    fontSize: "16px",
+    lineHeight: 1.85,
+    color: "#d1d9e6",
+    maxWidth: "780px",
+    marginBottom: "22px",
+    position: "relative",
+    zIndex: 1,
+  },
+  heroActionRow: {
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "12px",
+    position: "relative",
+    zIndex: 1,
+  },
+  heroPrimaryAction: {
+    padding: "14px 18px",
+    borderRadius: "16px",
+    border: "none",
+    background: "linear-gradient(180deg, #3b82f6 0%, #2563eb 100%)",
+    color: "#fff",
+    cursor: "pointer",
+    fontWeight: "800",
+    fontSize: "15px",
+    boxShadow: "0 14px 26px rgba(37,99,235,0.24)",
+  },
+  heroSecondaryAction: {
+    padding: "14px 18px",
+    borderRadius: "16px",
+    border: "1px solid rgba(148,163,184,0.18)",
+    background: "rgba(15,23,42,0.72)",
+    color: "#e5eefc",
+    cursor: "pointer",
+    fontWeight: "800",
+    fontSize: "15px",
+  },
+  departmentsGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+    gap: "18px",
+  },
+  deptCard: {
+    position: "relative",
+    minHeight: "260px",
+    overflow: "hidden",
+    borderRadius: "24px",
+    border: "1px solid rgba(148,163,184,0.14)",
+    boxShadow: "0 18px 36px rgba(0,0,0,0.20)",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "flex-end",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+  },
+  deptOverlay: {
+    position: "absolute",
+    inset: 0,
+    background:
+      "linear-gradient(180deg, rgba(2,6,23,0.08) 0%, rgba(2,6,23,0.20) 30%, rgba(2,6,23,0.82) 100%)",
+  },
+  deptContent: {
+    position: "relative",
+    zIndex: 1,
+    padding: "18px",
+    width: "100%",
+  },
+  deptTitle: {
+    fontSize: "22px",
+    fontWeight: "900",
+    color: "#ffffff",
+    marginBottom: "8px",
+    letterSpacing: "-0.03em",
+  },
+  deptText: {
+    fontSize: "13px",
+    lineHeight: 1.7,
+    color: "#d8e3f3",
+    marginBottom: "14px",
+  },
+  deptButton: {
+    padding: "10px 14px",
+    borderRadius: "14px",
+    border: "1px solid rgba(255,255,255,0.18)",
+    background: "rgba(15,23,42,0.72)",
+    color: "#ffffff",
+    cursor: "pointer",
+    fontWeight: "800",
+    fontSize: "13px",
   },
 };
 
@@ -447,7 +695,7 @@ export default function App() {
     {
       role: "assistant",
       content:
-        "Namaste! I am Sahaya AI. Ask me about healthcare, education, finance, public services, nearby places, schemes, or eligibility.",
+        "Namaste! I am Sahaya HealthOS. Ask me about hospitals, symptoms, public support, nearby services, schemes, or hospital navigation.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -458,6 +706,8 @@ export default function App() {
   const [backendStatus, setBackendStatus] = useState("checking");
   const [speechStatus, setSpeechStatus] = useState("Ready to read replies");
   const [isMobile, setIsMobile] = useState(false);
+  const [activeView, setActiveView] = useState("home");
+  const [dashboard, setDashboard] = useState(null);
 
   const [voiceConnected, setVoiceConnected] = useState(false);
   const [voiceConnecting, setVoiceConnecting] = useState(false);
@@ -467,7 +717,6 @@ export default function App() {
 
   const bottomRef = useRef(null);
   const vapiRef = useRef(null);
-
   const lastFinalUserRef = useRef("");
   const lastFinalAssistantRef = useRef("");
 
@@ -500,7 +749,7 @@ export default function App() {
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, loading, liveUserTranscript, liveAssistantTranscript]);
+  }, [messages, loading, liveUserTranscript, liveAssistantTranscript, activeView]);
 
   useEffect(() => {
     const loadVoices = () => {
@@ -523,6 +772,17 @@ export default function App() {
     };
   }, []);
 
+  const loadDashboard = async () => {
+    try {
+      const response = await fetchWithTimeout(`${API_BASE}/dashboard`, {}, 15000);
+      if (!response.ok) return;
+      const data = await response.json();
+      setDashboard(data);
+    } catch (error) {
+      console.error("Dashboard fetch failed:", error);
+    }
+  };
+
   useEffect(() => {
     const checkBackend = async () => {
       try {
@@ -535,6 +795,10 @@ export default function App() {
     };
 
     checkBackend();
+    loadDashboard();
+
+    const interval = setInterval(loadDashboard, 4000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -551,7 +815,7 @@ export default function App() {
       setLastVoiceEvent("Voice ready");
 
       const appendUniqueChatMessage = (role, content) => {
-        const text = (content || "").trim();
+        const text = String(content || "").trim();
         if (!text) return;
 
         setMessages((prev) => {
@@ -574,9 +838,7 @@ export default function App() {
       vapi.on("call-end", () => {
         setVoiceConnected(false);
         setVoiceConnecting(false);
-        setTimeout(() => {
-          setLastVoiceEvent("Voice ready");
-        }, 500);
+        setTimeout(() => setLastVoiceEvent("Voice ready"), 500);
       });
 
       vapi.on("speech-start", () => {
@@ -598,28 +860,26 @@ export default function App() {
           const transcriptType = msg.transcriptType || "";
 
           if (role === "user") {
-            if (transcriptText) {
-              setLiveUserTranscript(transcriptText);
-            }
+            if (transcriptText) setLiveUserTranscript(transcriptText);
 
             if (transcriptType === "final" && transcriptText) {
               setInput(transcriptText);
               if (lastFinalUserRef.current !== transcriptText) {
                 lastFinalUserRef.current = transcriptText;
                 appendUniqueChatMessage("user", transcriptText);
+                setActiveView("assistant");
               }
             }
           }
 
           if (role === "assistant") {
-            if (transcriptText) {
-              setLiveAssistantTranscript(transcriptText);
-            }
+            if (transcriptText) setLiveAssistantTranscript(transcriptText);
 
             if (transcriptType === "final" && transcriptText) {
               if (lastFinalAssistantRef.current !== transcriptText) {
                 lastFinalAssistantRef.current = transcriptText;
                 appendUniqueChatMessage("assistant", transcriptText);
+                setActiveView("assistant");
               }
             }
           }
@@ -638,28 +898,12 @@ export default function App() {
             conversation?.assistantTranscript ||
             "";
 
-          if (maybeUser) {
-            setLiveUserTranscript(String(maybeUser));
+          if (String(maybeUser).trim()) {
+            setLiveUserTranscript(String(maybeUser).trim());
           }
 
-          if (maybeAssistant) {
-            setLiveAssistantTranscript(String(maybeAssistant));
-
-            if (
-              String(maybeAssistant).trim() &&
-              lastFinalAssistantRef.current !== String(maybeAssistant).trim()
-            ) {
-              lastFinalAssistantRef.current = String(maybeAssistant).trim();
-              appendUniqueChatMessage("assistant", String(maybeAssistant).trim());
-            }
-          }
-
-          if (
-            String(maybeUser).trim() &&
-            lastFinalUserRef.current !== String(maybeUser).trim()
-          ) {
-            lastFinalUserRef.current = String(maybeUser).trim();
-            appendUniqueChatMessage("user", String(maybeUser).trim());
+          if (String(maybeAssistant).trim()) {
+            setLiveAssistantTranscript(String(maybeAssistant).trim());
           }
 
           return;
@@ -770,6 +1014,7 @@ export default function App() {
       setLiveUserTranscript("Listening...");
       setLiveAssistantTranscript("Assistant reply will appear here...");
       await vapiRef.current.start(VAPI_ASSISTANT_ID);
+      setActiveView("voice");
     } catch (error) {
       console.error("Failed to start Vapi:", error);
       setVoiceConnecting(false);
@@ -797,6 +1042,7 @@ export default function App() {
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setLoading(true);
+    setActiveView("assistant");
 
     try {
       const response = await fetchWithTimeout(
@@ -821,6 +1067,7 @@ export default function App() {
 
       setMessages((prev) => [...prev, { role: "assistant", content: assistantText }]);
       setBackendStatus("online");
+      loadDashboard();
 
       if (autoRead) {
         setTimeout(() => speak(assistantText), 250);
@@ -845,7 +1092,7 @@ export default function App() {
       {
         role: "assistant",
         content:
-          "Namaste! I am Sahaya AI. Ask me about healthcare, education, finance, public services, nearby places, schemes, or eligibility.",
+          "Namaste! I am Sahaya HealthOS. Ask me about hospitals, symptoms, public support, nearby services, schemes, or hospital navigation.",
       },
     ]);
     setInput("");
@@ -854,23 +1101,327 @@ export default function App() {
     setLastVoiceEvent("Voice ready");
     lastFinalUserRef.current = "";
     lastFinalAssistantRef.current = "";
+    setActiveView("home");
   };
+
+  const voiceBadge = useMemo(() => {
+    if (voiceConnected) return "Voice connected";
+    if (voiceConnecting) return "Connecting voice...";
+    return "Voice ready";
+  }, [voiceConnected, voiceConnecting]);
+
+  const handleDepartmentEnter = (card) => {
+    setActiveView(card.action);
+    if (card.quickPrompt) {
+      sendMessage(card.quickPrompt);
+    }
+  };
+
+  const renderHome = () => (
+    <div style={styles.startPageWrap}>
+      <div style={styles.heroGraphic}>
+        <div style={styles.heroGraphicGlow} />
+        <div style={styles.heroGraphicGlow2} />
+
+        <div style={styles.heroMiniBadge}>Smart Hospital Ecosystem</div>
+        <div style={styles.heroBigTitle}>
+          One intelligent platform for hospital care, education support, finance guidance, and public services.
+        </div>
+        <div style={styles.heroBigText}>
+          Sahaya HealthOS combines real-time hospital coordination, multilingual voice support,
+          patient triage, staff summaries, department guidance, and citizen support into one
+          premium digital experience.
+        </div>
+
+        <div style={styles.heroActionRow}>
+          <button
+            style={styles.heroPrimaryAction}
+            onClick={() => setActiveView("assistant")}
+          >
+            Enter Main System
+          </button>
+
+          <button
+            style={styles.heroSecondaryAction}
+            onClick={() => setActiveView("dashboard")}
+          >
+            Open Operations Dashboard
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div style={{ ...styles.sectionTitle, marginBottom: 14 }}>Explore Departments</div>
+        <div style={styles.departmentsGrid}>
+          {DEPARTMENT_CARDS.map((card) => (
+            <div
+              key={card.title}
+              style={{
+                ...styles.deptCard,
+                backgroundImage: `url(${card.image})`,
+              }}
+              onClick={() => handleDepartmentEnter(card)}
+            >
+              <div style={styles.deptOverlay} />
+              <div style={styles.deptContent}>
+                <div style={styles.deptTitle}>{card.title}</div>
+                <div style={styles.deptText}>{card.subtitle}</div>
+                <button style={styles.deptButton}>Open Section</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const renderDashboard = () => (
+    <div style={styles.sectionPanel}>
+      <div style={{ ...styles.sectionTitle, marginBottom: 14 }}>Hospital Operations Dashboard</div>
+
+      <div style={styles.statGrid}>
+        <div style={styles.statCard}>
+          <div style={styles.statLabel}>Total Patients</div>
+          <div style={styles.statValue}>{dashboard?.total_patients ?? 0}</div>
+        </div>
+
+        <div style={styles.statCard}>
+          <div style={styles.statLabel}>High Priority</div>
+          <div style={styles.statValue}>{dashboard?.high_priority_cases ?? 0}</div>
+        </div>
+
+        <div style={styles.statCard}>
+          <div style={styles.statLabel}>Medium Priority</div>
+          <div style={styles.statValue}>{dashboard?.medium_priority_cases ?? 0}</div>
+        </div>
+
+        <div style={styles.statCard}>
+          <div style={styles.statLabel}>Low Priority</div>
+          <div style={styles.statValue}>{dashboard?.low_priority_cases ?? 0}</div>
+        </div>
+      </div>
+
+      <div style={{ ...styles.sectionTitle, marginTop: 12 }}>Digital Twin Insight</div>
+      <div style={styles.listCard}>
+        {dashboard?.digital_twin_note || "Waiting for hospital intelligence..."}
+      </div>
+
+      <div style={{ ...styles.sectionTitle, marginTop: 12 }}>Department Load</div>
+      {Object.entries(dashboard?.department_load || {}).map(([key, value]) => (
+        <div key={key} style={styles.listCard}>
+          <strong style={{ textTransform: "capitalize" }}>{key}</strong>: {value}
+        </div>
+      ))}
+
+      <div style={{ ...styles.sectionTitle, marginTop: 12 }}>Queue Preview</div>
+      {(dashboard?.queue_preview || []).length === 0 ? (
+        <div style={styles.listCard}>No patients in the live queue right now.</div>
+      ) : (
+        (dashboard?.queue_preview || []).map((item) => (
+          <div key={item.id} style={styles.listCard}>
+            <div><strong>Patient #{item.id}</strong></div>
+            <div>Urgency: {item.urgency}</div>
+            <div>Department: {item.department}</div>
+            <div>Issue: {item.query}</div>
+          </div>
+        ))
+      )}
+    </div>
+  );
+
+  const renderVoice = () => (
+    <div style={styles.sectionPanel}>
+      <div style={{ ...styles.sectionTitle, marginBottom: 14 }}>Live Voice Control Center</div>
+
+      <div style={{ marginBottom: 14, display: "flex", flexWrap: "wrap" }}>
+        <button
+          style={styles.successButton}
+          onClick={startVoice}
+          disabled={voiceConnected || voiceConnecting}
+        >
+          {voiceConnecting ? "Connecting..." : "🎤 Start Voice"}
+        </button>
+
+        <button
+          style={styles.dangerSoftButton}
+          onClick={stopVoice}
+          disabled={!voiceConnected && !voiceConnecting}
+        >
+          🛑 Stop Voice
+        </button>
+
+        <button style={styles.secondaryButton} onClick={stopSpeaking}>
+          ⏹ Stop Reading
+        </button>
+      </div>
+
+      <div style={{ ...styles.sectionTitle, marginBottom: 8 }}>Live user transcript</div>
+      <div style={styles.transcriptCard}>{liveUserTranscript}</div>
+
+      <div style={{ ...styles.sectionTitle, marginTop: 14, marginBottom: 8 }}>Live assistant transcript</div>
+      <div style={styles.transcriptCard}>{liveAssistantTranscript}</div>
+
+      <div style={{ ...styles.sectionTitle, marginTop: 14, marginBottom: 8 }}>Voice status</div>
+      <div style={styles.transcriptCard}>{lastVoiceEvent}</div>
+    </div>
+  );
+
+  const renderAssistant = () => (
+    <>
+      <div style={isMobile ? styles.chatMobile : styles.chat}>
+        {messages.map((message, index) => {
+          const mapLinks =
+            message.role === "assistant"
+              ? extractMapLinks(message.content)
+              : [];
+
+          return (
+            <div
+              key={index}
+              style={
+                message.role === "user"
+                  ? styles.bubbleWrapUser
+                  : styles.bubbleWrapBot
+              }
+            >
+              <div
+                style={
+                  message.role === "user"
+                    ? isMobile
+                      ? styles.bubbleUserMobile
+                      : styles.bubbleUser
+                    : isMobile
+                    ? styles.bubbleBotMobile
+                    : styles.bubbleBot
+                }
+              >
+                {message.content}
+
+                {message.role === "assistant" && (
+                  <div style={styles.answerActions}>
+                    <button
+                      style={styles.readButton}
+                      onClick={() => speak(message.content)}
+                    >
+                      🔊 Read Answer
+                    </button>
+
+                    <button
+                      style={styles.stopButton}
+                      onClick={stopSpeaking}
+                    >
+                      ⏹ Stop Reading
+                    </button>
+
+                    {mapLinks.map((link, idx) => (
+                      <a
+                        key={idx}
+                        href={link}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{ textDecoration: "none" }}
+                      >
+                        <button style={styles.secondaryButton}>
+                          📍 Open Map {idx + 1}
+                        </button>
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+
+        {loading && (
+          <div style={styles.bubbleWrapBot}>
+            <div style={isMobile ? styles.bubbleBotMobile : styles.bubbleBot}>
+              Sahaya HealthOS is thinking...
+            </div>
+          </div>
+        )}
+
+        <div ref={bottomRef} />
+      </div>
+
+      <div style={isMobile ? styles.controlsMobile : styles.controls}>
+        <div style={isMobile ? styles.inputRowMobile : styles.inputRow}>
+          <input
+            style={styles.input}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                sendMessage();
+              }
+            }}
+            placeholder="Describe symptoms, hospital need, or public support issue..."
+          />
+          <button
+            style={styles.button}
+            onClick={() => sendMessage()}
+            disabled={loading || !input.trim()}
+          >
+            Send
+          </button>
+        </div>
+
+        <div style={styles.footerRow}>
+          <button
+            style={styles.secondaryButton}
+            onClick={() => input && speak(input)}
+          >
+            🔊 Read Draft
+          </button>
+
+          <button
+            style={styles.secondaryButton}
+            onClick={stopSpeaking}
+          >
+            ⏹ Stop Draft/Answer Reading
+          </button>
+
+          <button
+            style={styles.secondaryButton}
+            onClick={() =>
+              sendMessage("I am a low income student and need scholarship help")
+            }
+          >
+            Try Scholarship Demo
+          </button>
+
+          <button
+            style={styles.secondaryButton}
+            onClick={() => sendMessage("I need hospital help near Bangalore")}
+          >
+            Try Hospital Demo
+          </button>
+
+          <button
+            style={styles.secondaryButton}
+            onClick={() => sendMessage("I have chest pain and dizziness")}
+          >
+            Try Emergency Triage
+          </button>
+        </div>
+      </div>
+    </>
+  );
 
   return (
     <div style={styles.app}>
       <div style={isMobile ? styles.shellMobile : styles.shellDesktop}>
         <aside style={isMobile ? styles.sidebarMobile : styles.sidebar}>
           <div style={styles.brand}>
-            <div style={styles.title}>Sahaya AI</div>
+            <div style={styles.title}>Sahaya HealthOS</div>
             <div style={styles.subtitle}>
-              Multilingual government assistance assistant for healthcare,
-              education, finance, public services, schemes, rewards, nearby help,
-              text chat, live voice interaction, and read-aloud support.
+              Premium real-time hospital coordination for patients, staff,
+              hospital operations, and low-literacy users with multilingual AI assistance.
             </div>
           </div>
 
           <div style={styles.card}>
-            <div style={styles.sectionTitle}>Status</div>
+            <div style={styles.sectionTitle}>System Status</div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
               <div style={{ ...styles.statusBar, ...statusStyle[backendStatus] }}>
                 <span
@@ -913,11 +1464,7 @@ export default function App() {
                     display: "inline-block",
                   }}
                 />
-                {voiceConnected
-                  ? "Voice connected"
-                  : voiceConnecting
-                  ? "Connecting voice..."
-                  : "Voice ready"}
+                {voiceBadge}
               </div>
             </div>
           </div>
@@ -926,15 +1473,14 @@ export default function App() {
             <div style={styles.sectionTitle}>Capabilities</div>
             <div style={styles.pillWrap}>
               {[
-                "Government schemes",
-                "Eligibility guidance",
-                "Nearby places",
-                "Rewards and badges",
-                "Live voice",
-                "Live transcript",
-                "Read answer",
-                "Stop reading",
-                "Read draft",
+                "AI triage",
+                "Live queue",
+                "Staff assist",
+                "Digital twin",
+                "Voice support",
+                "Low literacy mode",
+                "Nearby routing",
+                "Scheme guidance",
               ].map((item) => (
                 <span key={item} style={styles.pill}>
                   {item}
@@ -944,41 +1490,48 @@ export default function App() {
           </div>
 
           <div>
-            <div style={styles.sectionTitle}>Quick prompts</div>
+            <div style={styles.sectionTitle}>Quick Actions</div>
 
             <button
               style={styles.quickButton}
-              onClick={() => sendMessage("I need hospital help near Bangalore")}
+              onClick={() => {
+                setActiveView("assistant");
+                sendMessage("I need hospital help near Bangalore");
+              }}
             >
               Healthcare Help
             </button>
 
             <button
               style={styles.quickButton}
-              onClick={() =>
-                sendMessage("I am a low income student and need scholarship help")
-              }
+              onClick={() => {
+                setActiveView("assistant");
+                sendMessage("I have chest pain and breathing problem");
+              }}
+            >
+              Emergency Triage
+            </button>
+
+            <button
+              style={styles.quickButton}
+              onClick={() => {
+                setActiveView("assistant");
+                sendMessage("I am a low income student and need scholarship help");
+              }}
             >
               Education Scheme
             </button>
 
             <button
               style={styles.quickButton}
-              onClick={() => sendMessage("How can I open a bank account?")}
+              onClick={() => setActiveView("dashboard")}
             >
-              Finance Support
-            </button>
-
-            <button
-              style={styles.quickButton}
-              onClick={() => sendMessage("Where is the nearest ration office?")}
-            >
-              Public Services
+              View Operations Dashboard
             </button>
           </div>
 
           <div style={styles.card}>
-            <div style={styles.sectionTitle}>Voice controls</div>
+            <div style={styles.sectionTitle}>Voice Settings</div>
 
             <label style={styles.small}>
               <input
@@ -1003,191 +1556,59 @@ export default function App() {
                 <option value="te-IN">Telugu</option>
               </select>
             </div>
-
-            <div style={{ marginTop: 12, display: "flex", flexWrap: "wrap" }}>
-              <button
-                style={styles.successButton}
-                onClick={startVoice}
-                disabled={voiceConnected || voiceConnecting}
-              >
-                {voiceConnecting ? "Connecting..." : "🎤 Start Voice"}
-              </button>
-
-              <button
-                style={styles.dangerSoftButton}
-                onClick={stopVoice}
-                disabled={!voiceConnected && !voiceConnecting}
-              >
-                🛑 Stop Voice
-              </button>
-
-              <button style={styles.secondaryButton} onClick={stopSpeaking}>
-                ⏹ Stop Reading
-              </button>
-            </div>
-
-            <div style={{ height: 12 }} />
-
-            <div style={styles.sectionTitle}>Live user transcript</div>
-            <div style={styles.transcriptCard}>{liveUserTranscript}</div>
-
-            <div style={{ height: 10 }} />
-
-            <div style={styles.sectionTitle}>Live assistant transcript</div>
-            <div style={styles.transcriptCard}>{liveAssistantTranscript}</div>
-
-            <div style={{ height: 10 }} />
-
-            <div style={styles.sectionTitle}>Voice status</div>
-            <div style={styles.transcriptCard}>{lastVoiceEvent}</div>
           </div>
 
           <div>
             <button style={styles.secondaryButton} onClick={clearChat}>
-              Reset Chat
+              Reset System
             </button>
           </div>
         </aside>
 
         <main style={styles.main}>
           <div style={isMobile ? styles.topBarMobile : styles.topBar}>
-            <div style={styles.topTitle}>Citizen Support Workspace</div>
+            <div style={styles.topTitle}>Sahaya HealthOS RT</div>
             <div style={styles.topSubtitle}>
-              Ask Sahaya about schemes, eligibility, hospitals, banks, police,
-              ration offices, and more.
+              Real-time AI hospital coordination with patient triage, department routing,
+              queue balancing, staff summaries, live communication, and operations intelligence.
+            </div>
+
+            <div style={styles.navTabs}>
+              <button
+                style={activeView === "home" ? styles.navTabActive : styles.navTab}
+                onClick={() => setActiveView("home")}
+              >
+                Home
+              </button>
+              <button
+                style={activeView === "assistant" ? styles.navTabActive : styles.navTab}
+                onClick={() => setActiveView("assistant")}
+              >
+                Assistant
+              </button>
+              <button
+                style={activeView === "voice" ? styles.navTabActive : styles.navTab}
+                onClick={() => setActiveView("voice")}
+              >
+                Voice
+              </button>
+              <button
+                style={activeView === "dashboard" ? styles.navTabActive : styles.navTab}
+                onClick={() => setActiveView("dashboard")}
+              >
+                Dashboard
+              </button>
             </div>
           </div>
 
-          <div style={isMobile ? styles.chatMobile : styles.chat}>
-            {messages.map((message, index) => {
-              const mapLinks =
-                message.role === "assistant"
-                  ? extractMapLinks(message.content)
-                  : [];
-
-              return (
-                <div
-                  key={index}
-                  style={
-                    message.role === "user"
-                      ? styles.bubbleWrapUser
-                      : styles.bubbleWrapBot
-                  }
-                >
-                  <div
-                    style={
-                      message.role === "user"
-                        ? isMobile
-                          ? styles.bubbleUserMobile
-                          : styles.bubbleUser
-                        : isMobile
-                        ? styles.bubbleBotMobile
-                        : styles.bubbleBot
-                    }
-                  >
-                    {message.content}
-
-                    {message.role === "assistant" && (
-                      <div style={styles.answerActions}>
-                        <button
-                          style={styles.readButton}
-                          onClick={() => speak(message.content)}
-                        >
-                          🔊 Read Answer
-                        </button>
-
-                        <button
-                          style={styles.stopButton}
-                          onClick={stopSpeaking}
-                        >
-                          ⏹ Stop Reading
-                        </button>
-
-                        {mapLinks.map((link, idx) => (
-                          <a
-                            key={idx}
-                            href={link}
-                            target="_blank"
-                            rel="noreferrer"
-                            style={{ textDecoration: "none" }}
-                          >
-                            <button style={styles.secondaryButton}>
-                              📍 Open Map {idx + 1}
-                            </button>
-                          </a>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-
-            {loading && (
-              <div style={styles.bubbleWrapBot}>
-                <div style={isMobile ? styles.bubbleBotMobile : styles.bubbleBot}>
-                  Sahaya is thinking...
-                </div>
-              </div>
-            )}
-
-            <div ref={bottomRef} />
-          </div>
-
-          <div style={isMobile ? styles.controlsMobile : styles.controls}>
-            <div style={isMobile ? styles.inputRowMobile : styles.inputRow}>
-              <input
-                style={styles.input}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    sendMessage();
-                  }
-                }}
-                placeholder="Message Sahaya AI..."
-              />
-              <button
-                style={styles.button}
-                onClick={() => sendMessage()}
-                disabled={loading || !input.trim()}
-              >
-                Send
-              </button>
-            </div>
-
-            <div style={styles.footerRow}>
-              <button
-                style={styles.secondaryButton}
-                onClick={() => input && speak(input)}
-              >
-                🔊 Read Draft
-              </button>
-
-              <button
-                style={styles.secondaryButton}
-                onClick={stopSpeaking}
-              >
-                ⏹ Stop Draft/Answer Reading
-              </button>
-
-              <button
-                style={styles.secondaryButton}
-                onClick={() =>
-                  sendMessage("I am a low income student and need scholarship help")
-                }
-              >
-                Try Scholarship Demo
-              </button>
-
-              <button
-                style={styles.secondaryButton}
-                onClick={() => sendMessage("I need hospital help near Bangalore")}
-              >
-                Try Hospital Demo
-              </button>
-            </div>
-          </div>
+          {activeView === "home" && renderHome()}
+          {activeView === "assistant" && renderAssistant()}
+          {activeView === "voice" && (
+            <div style={isMobile ? styles.chatMobile : styles.chat}>{renderVoice()}</div>
+          )}
+          {activeView === "dashboard" && (
+            <div style={isMobile ? styles.chatMobile : styles.chat}>{renderDashboard()}</div>
+          )}
         </main>
       </div>
     </div>
