@@ -10,37 +10,111 @@ const VAPI_PUBLIC_KEY =
 const VAPI_ASSISTANT_ID =
   import.meta.env.VITE_VAPI_ASSISTANT_ID || "";
 
+const makeSvgDataUri = (svg) =>
+  `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
+
+const hospitalArt = makeSvgDataUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0ea5e9"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#g)"/>
+  <circle cx="670" cy="90" r="65" fill="rgba(255,255,255,0.12)"/>
+  <rect x="210" y="150" width="380" height="250" rx="18" fill="#e2e8f0"/>
+  <rect x="350" y="95" width="100" height="90" rx="16" fill="#bfdbfe"/>
+  <rect x="375" y="110" width="50" height="18" rx="4" fill="#ef4444"/>
+  <rect x="391" y="94" width="18" height="50" rx="4" fill="#ef4444"/>
+  <rect x="250" y="200" width="70" height="70" rx="8" fill="#93c5fd"/>
+  <rect x="365" y="200" width="70" height="70" rx="8" fill="#93c5fd"/>
+  <rect x="480" y="200" width="70" height="70" rx="8" fill="#93c5fd"/>
+  <rect x="360" y="300" width="80" height="100" rx="10" fill="#1e293b"/>
+  <rect x="70" y="390" width="660" height="18" rx="9" fill="rgba(255,255,255,0.14)"/>
+</svg>
+`);
+
+const educationArt = makeSvgDataUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#g)"/>
+  <circle cx="120" cy="90" r="55" fill="rgba(255,255,255,0.10)"/>
+  <rect x="170" y="260" width="460" height="34" rx="10" fill="#f8fafc"/>
+  <polygon points="400,115 630,210 400,305 170,210" fill="#e0e7ff"/>
+  <polygon points="400,145 580,215 400,285 220,215" fill="#93c5fd"/>
+  <rect x="560" y="210" width="12" height="105" rx="6" fill="#f8fafc"/>
+  <circle cx="566" cy="327" r="18" fill="#f8fafc"/>
+  <rect x="260" y="320" width="280" height="20" rx="10" fill="rgba(255,255,255,0.18)"/>
+</svg>
+`);
+
+const servicesArt = makeSvgDataUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f766e"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#g)"/>
+  <rect x="165" y="150" width="470" height="250" rx="20" fill="#e2e8f0"/>
+  <rect x="220" y="110" width="360" height="70" rx="18" fill="#f8fafc"/>
+  <rect x="245" y="128" width="310" height="16" rx="8" fill="#94a3b8"/>
+  <rect x="235" y="215" width="330" height="18" rx="9" fill="#cbd5e1"/>
+  <rect x="235" y="255" width="290" height="18" rx="9" fill="#cbd5e1"/>
+  <rect x="235" y="295" width="250" height="18" rx="9" fill="#cbd5e1"/>
+  <circle cx="585" cy="285" r="42" fill="#2563eb"/>
+  <path d="M585 255 l9 18 20 3-14 14 3 20-18-10-18 10 3-20-14-14 20-3z" fill="#f8fafc"/>
+</svg>
+`);
+
+const financeArt = makeSvgDataUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#g)"/>
+  <rect x="160" y="165" width="480" height="170" rx="24" fill="#f8fafc"/>
+  <rect x="190" y="200" width="220" height="26" rx="13" fill="#93c5fd"/>
+  <rect x="190" y="245" width="170" height="18" rx="9" fill="#cbd5e1"/>
+  <circle cx="555" cy="250" r="52" fill="#22c55e"/>
+  <text x="555" y="264" text-anchor="middle" font-size="54" font-family="Arial" fill="#ffffff">₹</text>
+  <rect x="230" y="355" width="340" height="26" rx="13" fill="rgba(255,255,255,0.18)"/>
+</svg>
+`);
+
 const DEPARTMENT_CARDS = [
   {
     title: "Hospital Care",
-    subtitle: "Triage, emergency routing, hospital navigation, and live patient support.",
-    image:
-      "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80",
-    action: "assistant",
+    subtitle: "Real-time triage, emergency routing, hospital navigation, and staff summaries.",
+    art: hospitalArt,
     quickPrompt: "I need hospital help near Bangalore",
   },
   {
     title: "Education Support",
-    subtitle: "Scholarships, student assistance, and learning guidance in simple language.",
-    image:
-      "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1200&q=80",
-    action: "assistant",
+    subtitle: "Scholarships, low-income student guidance, and education support in simple language.",
+    art: educationArt,
     quickPrompt: "I am a low income student and need scholarship help",
   },
   {
     title: "Public Services",
-    subtitle: "Ration cards, certificates, local offices, police, and civic help.",
-    image:
-      "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1200&q=80",
-    action: "assistant",
+    subtitle: "Ration cards, certificates, service centers, and citizen assistance.",
+    art: servicesArt,
     quickPrompt: "Where is the nearest ration office?",
   },
   {
     title: "Finance & Schemes",
-    subtitle: "Banking support, financial literacy, pensions, and government schemes.",
-    image:
-      "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1200&q=80",
-    action: "assistant",
+    subtitle: "Bank account help, finance guidance, pensions, and scheme awareness.",
+    art: financeArt,
     quickPrompt: "How can I open a zero balance bank account?",
   },
 ];
@@ -48,7 +122,7 @@ const DEPARTMENT_CARDS = [
 const styles = {
   app: {
     minHeight: "100vh",
-    background: "linear-gradient(180deg, #06101c 0%, #091528 32%, #0c1930 100%)",
+    background: "linear-gradient(180deg, #050d18 0%, #091427 34%, #0d1b32 100%)",
     fontFamily:
       'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
     color: "#e5eefc",
@@ -499,7 +573,7 @@ const styles = {
     color: "#e5eefc",
   },
 
-  // START PAGE GRAPHICS
+  // NEW START PAGE
   startPageWrap: {
     padding: "32px 28px 40px",
     display: "flex",
@@ -509,36 +583,34 @@ const styles = {
   heroGraphic: {
     position: "relative",
     overflow: "hidden",
-    borderRadius: "28px",
-    minHeight: "320px",
+    borderRadius: "30px",
+    minHeight: "340px",
     background:
-      "linear-gradient(135deg, rgba(37,99,235,0.28) 0%, rgba(14,165,233,0.20) 35%, rgba(15,23,42,0.75) 100%)",
+      "linear-gradient(135deg, rgba(37,99,235,0.30) 0%, rgba(14,165,233,0.16) 35%, rgba(15,23,42,0.82) 100%)",
     border: "1px solid rgba(148,163,184,0.14)",
-    boxShadow: "0 22px 48px rgba(0,0,0,0.24)",
-    padding: "34px",
+    boxShadow: "0 22px 48px rgba(0,0,0,0.28)",
+    padding: "36px",
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
   },
-  heroGraphicGlow: {
+  heroOrb1: {
     position: "absolute",
     width: "420px",
     height: "420px",
-    right: "-80px",
-    top: "-100px",
+    right: "-120px",
+    top: "-140px",
     borderRadius: "999px",
-    background: "radial-gradient(circle, rgba(59,130,246,0.24) 0%, rgba(59,130,246,0.02) 70%, transparent 100%)",
-    pointerEvents: "none",
+    background: "radial-gradient(circle, rgba(59,130,246,0.28) 0%, rgba(59,130,246,0.03) 70%, transparent 100%)",
   },
-  heroGraphicGlow2: {
+  heroOrb2: {
     position: "absolute",
     width: "320px",
     height: "320px",
     left: "-80px",
-    bottom: "-100px",
+    bottom: "-120px",
     borderRadius: "999px",
-    background: "radial-gradient(circle, rgba(16,185,129,0.16) 0%, rgba(16,185,129,0.02) 70%, transparent 100%)",
-    pointerEvents: "none",
+    background: "radial-gradient(circle, rgba(16,185,129,0.18) 0%, rgba(16,185,129,0.02) 70%, transparent 100%)",
   },
   heroMiniBadge: {
     display: "inline-flex",
@@ -555,14 +627,16 @@ const styles = {
     marginBottom: "18px",
     textTransform: "uppercase",
     letterSpacing: "0.08em",
+    position: "relative",
+    zIndex: 1,
   },
   heroBigTitle: {
-    fontSize: "52px",
+    fontSize: "54px",
     lineHeight: 1.02,
     letterSpacing: "-0.05em",
     fontWeight: "950",
     color: "#ffffff",
-    maxWidth: "820px",
+    maxWidth: "860px",
     marginBottom: "14px",
     position: "relative",
     zIndex: 1,
@@ -606,12 +680,12 @@ const styles = {
   },
   departmentsGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
     gap: "18px",
   },
   deptCard: {
     position: "relative",
-    minHeight: "260px",
+    minHeight: "280px",
     overflow: "hidden",
     borderRadius: "24px",
     border: "1px solid rgba(148,163,184,0.14)",
@@ -626,7 +700,7 @@ const styles = {
     position: "absolute",
     inset: 0,
     background:
-      "linear-gradient(180deg, rgba(2,6,23,0.08) 0%, rgba(2,6,23,0.20) 30%, rgba(2,6,23,0.82) 100%)",
+      "linear-gradient(180deg, rgba(2,6,23,0.05) 0%, rgba(2,6,23,0.20) 35%, rgba(2,6,23,0.86) 100%)",
   },
   deptContent: {
     position: "relative",
@@ -1111,26 +1185,24 @@ export default function App() {
   }, [voiceConnected, voiceConnecting]);
 
   const handleDepartmentEnter = (card) => {
-    setActiveView(card.action);
-    if (card.quickPrompt) {
-      sendMessage(card.quickPrompt);
-    }
+    setActiveView("assistant");
+    sendMessage(card.quickPrompt);
   };
 
   const renderHome = () => (
     <div style={styles.startPageWrap}>
       <div style={styles.heroGraphic}>
-        <div style={styles.heroGraphicGlow} />
-        <div style={styles.heroGraphicGlow2} />
+        <div style={styles.heroOrb1} />
+        <div style={styles.heroOrb2} />
 
-        <div style={styles.heroMiniBadge}>Smart Hospital Ecosystem</div>
+        <div style={styles.heroMiniBadge}>Intelligent Citizen + Hospital System</div>
         <div style={styles.heroBigTitle}>
-          One intelligent platform for hospital care, education support, finance guidance, and public services.
+          Advanced healthcare, education, finance, and public service help — inside one premium AI platform.
         </div>
         <div style={styles.heroBigText}>
-          Sahaya HealthOS combines real-time hospital coordination, multilingual voice support,
-          patient triage, staff summaries, department guidance, and citizen support into one
-          premium digital experience.
+          Sahaya HealthOS combines live patient triage, multilingual voice support, hospital navigation,
+          staff assistance, low-literacy communication, education support, public services, and scheme guidance
+          in one real-time operating experience.
         </div>
 
         <div style={styles.heroActionRow}>
@@ -1158,7 +1230,7 @@ export default function App() {
               key={card.title}
               style={{
                 ...styles.deptCard,
-                backgroundImage: `url(${card.image})`,
+                backgroundImage: card.art,
               }}
               onClick={() => handleDepartmentEnter(card)}
             >
