@@ -95,6 +95,22 @@ async def startup_event():
         print(f"Startup: OpenRouter client init failed: {e}")
 
 
+# ---------------- LANGUAGE CONTROL ----------------
+
+def detect_response_language(user_query: str) -> str:
+    q = user_query.strip()
+
+    if re.search(r"[\u0C80-\u0CFF]", q):
+        return "Kannada"
+    if re.search(r"[\u0900-\u097F]", q):
+        return "Hindi"
+    if re.search(r"[\u0B80-\u0BFF]", q):
+        return "Tamil"
+    if re.search(r"[\u0C00-\u0C7F]", q):
+        return "Telugu"
+    return "English"
+
+
 # ---------------- HEALTHOS INTELLIGENCE ----------------
 
 def detect_emergency_level(user_query: str) -> str:
@@ -486,6 +502,8 @@ def ask_question(query: Query):
 
         print(f"Step 2: original query: {original_query}")
 
+        forced_language = detect_response_language(original_query)
+
         patient = add_patient_to_queue(original_query)
         queue_position = get_queue_position(patient["id"])
         staff_summary = generate_staff_summary(patient)
@@ -518,9 +536,13 @@ def ask_question(query: Query):
         prompt = f"""
 You are Sahaya HealthOS, a multilingual healthcare and public assistance assistant for Indian citizens.
 
+IMPORTANT LANGUAGE RULE:
+You must answer ONLY in {forced_language}.
+Do not switch to Hindi or any other language unless the user's message itself is in that language.
+If the user's message is in English, answer only in English.
+
 Your job:
 - Give practical, accurate, citizen-friendly guidance.
-- Reply in the same language as the user whenever possible.
 - Make the answer feel helpful, confident, and real-world practical.
 - Prefer clear steps over generic explanation.
 
@@ -563,7 +585,7 @@ Staff summary:
 {staff_summary}
 
 Response rules:
-- Reply in the same language as the user whenever possible.
+- Answer ONLY in {forced_language}.
 - Start with the most useful direct answer first.
 - Use very simple, citizen-friendly language that even low-literacy users can understand.
 - Keep sentences short and clear.
@@ -589,7 +611,7 @@ Response rules:
             model="openrouter/auto",
             messages=[{"role": "user", "content": prompt}],
             max_tokens=420,
-            temperature=0.5,
+            temperature=0.4,
             timeout=25
         )
         print("Step 7 complete: OpenRouter response received")
