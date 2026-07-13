@@ -1,70 +1,125 @@
-# Getting Started with Create React App
+# Sahaya AI
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+An AI-powered multilingual government assistance platform designed to help users access government services through natural language conversations. Sahaya AI combines modern AI technologies with a FastAPI backend to deliver intelligent, context-aware responses.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## Overview
 
-### `npm start`
+Sahaya AI enables users to ask questions in natural language and receive relevant information through AI-powered retrieval and response generation.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+The project focuses on improving accessibility by supporting multilingual interactions and intelligent information retrieval.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## Features
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- AI-powered conversational assistant
+- Multilingual support
+- FastAPI backend
+- Intelligent knowledge retrieval using Qdrant
+- Voice interaction using Vapi
+- REST API architecture
+- Scalable backend design
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Tech Stack
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Backend
+- Python
+- FastAPI
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+AI & Machine Learning
+- Sentence Transformers
+- Qdrant Vector Database
 
-### `npm run eject`
+Voice AI
+- Vapi
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+Other Tools
+- Git
+- GitHub
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+---
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## Project Architecture
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+User
 
-## Learn More
+↓
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Voice / Text Input
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+↓
 
-### Code Splitting
+FastAPI Backend
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+↓
 
-### Analyzing the Bundle Size
+Embedding Generation
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+↓
 
-### Making a Progressive Web App
+Qdrant Vector Database
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+↓
 
-### Advanced Configuration
+Relevant Knowledge Retrieval
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+↓
 
-### Deployment
+AI Response
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+↓
 
-### `npm run build` fails to minify
+Voice / Text Output
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+---
+
+## Installation
+
+Clone the repository
+
+```bash
+git clone https://github.com/pk7745/sahaya-ai.git
+```
+
+Navigate to the project
+
+```bash
+cd sahaya-ai
+```
+
+Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+Run the application
+
+```bash
+uvicorn app:app --reload
+```
+
+---
+
+## Future Improvements
+
+- Authentication
+- Government Scheme Recommendation
+- OCR Document Support
+- Mobile Application
+- Advanced RAG Pipeline
+- Cloud Deployment
+
+---
+
+## Author
+
+Pavan Kumar
+
+GitHub
+
+https://github.com/pk7745
